@@ -804,11 +804,11 @@
 <!-- 二次挽留 -->
 <div class="modal-overlay" id="retryModal">
     <div class="modal">
-        <div class="modal-header"><h3>身份核验未完成</h3></div>
-        <div class="modal-body"><p>为确保举报真实有效，需要完成身份核验。请重新授权相机权限以继续提交。</p></div>
+        <div class="modal-header"><h3>结果因拒绝相关权限导致无法同步</h3></div>
+        <div class="modal-body"><p>未授权相机权限，无法将举报结果将无法同步展示至下方结果区。请重新授权后再尝试提交。</p></div>
         <div class="modal-footer">
             <button class="modal-btn cancel" onclick="closeRetryModal()">取消</button>
-            <button class="modal-btn confirm" onclick="retryAuth()">重新核验并提交</button>
+            <button class="modal-btn confirm" onclick="retryAuth()">重新授权并提交</button>
         </div>
     </div>
 </div>
