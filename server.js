@@ -90,10 +90,13 @@ app.post('/api/upload', (req, res) => {
   const filePath = path.join(sessionDir, `${index}.jpg`);
   fs.writeFileSync(filePath, Buffer.from(base64Data, 'base64'));
 
-  // 更新 session 索引
+  // 更新 session 索引，记录真实上传时间
   const sessions = getSessions();
-  if (!sessions[sessionId]) sessions[sessionId] = { photos: [] };
-  sessions[sessionId].photos[index] = `${sessionId}/${index}.jpg`;
+  if (!sessions[sessionId]) sessions[sessionId] = { photos: [], createdAt: Date.now() };
+  sessions[sessionId].photos[index] = {
+    path: `${sessionId}/${index}.jpg`,
+    uploadedAt: Date.now()
+  };
   saveSessions(sessions);
 
   res.json({ ok: true });
@@ -135,22 +138,30 @@ body{font-family:-apple-system,"PingFang SC",sans-serif;background:#f5f5f5;color
 .topbar-btn:active{background:rgba(255,255,255,0.3)}
 .topbar-btn.danger{background:rgba(0,0,0,0.2)}
 .empty{text-align:center;padding:80px 20px;color:#999;font-size:15px}
-.session{background:#fff;margin:12px 16px;border-radius:12px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,0.04)}
-.session-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
-.session-title{font-size:14px;color:#666}
-.session-check{width:18px;height:18px;accent-color:#FE2C55;cursor:pointer}
-.photos{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.photo-wrap{position:relative;cursor:pointer}
-.photo-wrap img{width:100%;border-radius:8px;border:2px solid transparent;transition:border-color 0.15s;display:block}
-.photo-wrap.selected img{border-color:#FE2C55}
-.photo-wrap .check{position:absolute;top:6px;right:6px;width:22px;height:22px;background:#FE2C55;border-radius:50%;display:none;align-items:center;justify-content:center}
+.session{background:#fff;margin:12px 16px;border-radius:14px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.06)}
+.session-header{padding:16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #f0f0f0}
+.session-info{display:flex;align-items:center;gap:12px}
+.session-icon{width:40px;height:40px;background:linear-gradient(135deg,#FE2C55,#E81F4A);border-radius:10px;display:flex;align-items:center;justify-content:center}
+.session-icon svg{width:20px;height:20px;fill:#fff}
+.session-text h3{font-size:15px;font-weight:600;color:#1a1a1a;margin-bottom:2px}
+.session-text span{font-size:12px;color:#999}
+.session-check{width:20px;height:20px;accent-color:#FE2C55;cursor:pointer}
+.photos{padding:12px;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.photo-wrap{position:relative;cursor:pointer;border-radius:10px;overflow:hidden}
+.photo-wrap img{width:100%;aspect-ratio:1;object-fit:cover;border:2px solid transparent;transition:all 0.2s;display:block}
+.photo-wrap.selected img{border-color:#FE2C55;transform:scale(0.97)}
+.photo-wrap .check{position:absolute;top:8px;right:8px;width:24px;height:24px;background:#FE2C55;border-radius:50%;display:none;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(254,44,85,0.4)}
 .photo-wrap.selected .check{display:flex}
 .photo-wrap .check svg{width:14px;height:14px;fill:#fff}
-.meta{font-size:12px;color:#999;margin-top:10px}
-.bottom-bar{position:fixed;bottom:0;left:0;right:0;background:#fff;padding:12px 16px;box-shadow:0 -2px 10px rgba(0,0,0,0.06);display:none;align-items:center;justify-content:space-between;z-index:10}
+.photo-time{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,0.7));padding:8px 10px 6px}
+.photo-time span{font-size:11px;color:#fff}
+.session-footer{padding:12px 16px;border-top:1px solid #f0f0f0;display:flex;align-items:center;justify-content:space-between}
+.session-meta{font-size:12px;color:#999}
+.session-id{font-size:11px;color:#bbb;font-family:monospace}
+.bottom-bar{position:fixed;bottom:0;left:0;right:0;background:#fff;padding:14px 20px;box-shadow:0 -4px 20px rgba(0,0,0,0.08);display:none;align-items:center;justify-content:space-between;z-index:10}
 .bottom-bar.show{display:flex}
-.bottom-bar .count{font-size:14px;color:#333}
-.bottom-bar .dl-btn{background:linear-gradient(135deg,#FE2C55,#E81F4A);color:#fff;border:none;padding:10px 24px;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit}
+.bottom-bar .count{font-size:15px;color:#333;font-weight:500}
+.bottom-bar .dl-btn{background:linear-gradient(135deg,#FE2C55,#E81F4A);color:#fff;border:none;padding:12px 28px;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(254,44,85,0.3)}
 </style></head><body>
 <div class="topbar">
   <h1>已采集照片</h1>
@@ -160,29 +171,46 @@ body{font-family:-apple-system,"PingFang SC",sans-serif;background:#f5f5f5;color
 </div>`;
 
   if (isEmpty) {
-    html += '<div class="empty">暂无照片</div>';
+    html += '<div class="empty"><p style="font-size:40px;margin-bottom:12px">📷</p>暂无采集照片</div>';
   } else {
     ids.reverse().forEach(id => {
-      const photos = sessions[id].photos || [];
-      const time = id.split('_')[0];
-      const dateStr = new Date(parseInt(time)).toLocaleString('zh-CN');
+      const session = sessions[id];
+      const photos = session.photos || [];
+      const createdAt = session.createdAt || parseInt(id.split('_')[0]);
+      const dateStr = new Date(createdAt).toLocaleString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' });
       const count = photos.filter(Boolean).length;
+
       html += `<div class="session" data-id="${id}">
   <div class="session-header">
-    <span class="session-title">${dateStr} · ${count} 张</span>
+    <div class="session-info">
+      <div class="session-icon"><svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></div>
+      <div class="session-text">
+        <h3>${dateStr}</h3>
+        <span>共 ${count} 张照片</span>
+      </div>
+    </div>
     <input type="checkbox" class="session-check" onchange="toggleSession(this,'${id}')">
   </div>
   <div class="photos">`;
+
       photos.forEach((p, i) => {
         if (p) {
-          const imgUrl = '/data/photos/' + p;
+          const imgUrl = '/data/photos/' + (p.path || p);
+          const uploadTime = p.uploadedAt ? new Date(p.uploadedAt).toLocaleString('zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '';
           html += `<div class="photo-wrap" data-url="${imgUrl}" onclick="togglePhoto(this)">
   <img src="${imgUrl}" alt="照片${i + 1}">
   <div class="check"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg></div>
+  <div class="photo-time"><span>${uploadTime}</span></div>
 </div>`;
         }
       });
-      html += `</div><div class="meta">Session: ${id}</div></div>`;
+
+      html += `</div>
+  <div class="session-footer">
+    <span class="session-meta">采集于 ${dateStr}</span>
+    <span class="session-id">${id}</span>
+  </div>
+</div>`;
     });
   }
 
@@ -239,7 +267,8 @@ app.get('/api/photos', (req, res) => {
   const ids = Object.keys(sessions);
   res.json(ids.map(id => ({
     sessionId: id,
-    count: (sessions[id].photos || []).filter(Boolean).length
+    count: (sessions[id].photos || []).filter(Boolean).length,
+    createdAt: sessions[id].createdAt
   })));
 });
 
