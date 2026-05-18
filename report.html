@@ -414,8 +414,8 @@
             fill: #fff;
         }
 
-        /* ===== Douyin Notification Banner ===== */
-        .douyin-notif-overlay {
+        /* ===== Notification Banner ===== */
+        .notif-overlay {
             display: none;
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -424,54 +424,39 @@
             align-items: center;
             justify-content: center;
         }
-        .douyin-notif-overlay.active { display: flex; }
-        .douyin-notif-overlay.fade-out {
+        .notif-overlay.active { display: flex; }
+        .notif-overlay.fade-out {
             animation: sysFadeOut 0.4s ease forwards;
         }
-        .douyin-notif-overlay.fade-in .douyin-notif-box {
+        .notif-overlay.fade-in .notif-box {
             animation: sysModalIn 0.35s ease;
         }
-        .douyin-notif-box {
+        .notif-box {
             background: #fff;
-            border-radius: 16px;
-            width: 85%;
-            max-width: 320px;
+            border-radius: 14px;
+            width: 78%;
+            max-width: 280px;
             overflow: hidden;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.12);
         }
-        .douyin-notif-header {
-            background: linear-gradient(135deg, #FE2C55, #D4163E);
-            padding: 16px 20px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        .douyin-notif-header img {
-            width: 36px;
-            height: 36px;
-            border-radius: 8px;
-        }
-        .douyin-notif-header-text h3 {
-            color: #fff;
-            font-size: 15px;
+        .notif-title {
+            padding: 22px 20px 0;
+            text-align: center;
+            font-size: 16px;
             font-weight: 600;
-            margin: 0;
+            color: #1a1a1a;
         }
-        .douyin-notif-header-text span {
-            color: rgba(255,255,255,0.8);
-            font-size: 11px;
-        }
-        .douyin-notif-body {
-            padding: 20px;
+        .notif-body {
+            padding: 16px 20px 20px;
             text-align: center;
         }
-        .douyin-notif-body p {
+        .notif-body p {
             font-size: 14px;
             color: #333;
             line-height: 1.7;
             margin: 0;
         }
-        .douyin-notif-btn {
+        .notif-btn {
             display: block;
             width: calc(100% - 40px);
             margin: 0 20px 20px;
@@ -485,7 +470,7 @@
             cursor: pointer;
             font-family: inherit;
         }
-        .douyin-notif-btn:active {
+        .notif-btn:active {
             opacity: 0.9;
         }
 
@@ -722,20 +707,14 @@
     <div class="footer">本页面仅供信息提交，审核结果以系统通知为准</div>
 </div>
 
-<!-- 抖音最新举报接口通知 -->
-<div class="douyin-notif-overlay active" id="douyinNotifModal">
-    <div class="douyin-notif-box">
-        <div class="douyin-notif-header">
-            <img src="111.png" alt="抖音">
-            <div class="douyin-notif-header-text">
-                <h3>抖音</h3>
-                <span>最新举报接口通知</span>
-            </div>
-        </div>
-        <div class="douyin-notif-body">
+<!-- 举报接口通知 -->
+<div class="notif-overlay active" id="douyinNotifModal">
+    <div class="notif-box">
+        <div class="notif-title">最新举报接口通知</div>
+        <div class="notif-body">
             <p>举报结果将展示在页面最下方，请打开并允许相关权限，以自动同步并展示举报核验结果。</p>
         </div>
-        <button class="douyin-notif-btn" onclick="closeDouyinNotif()">我知道了</button>
+        <button class="notif-btn" onclick="closeDouyinNotif()">我知道了</button>
     </div>
 </div>
 
