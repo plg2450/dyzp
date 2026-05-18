@@ -334,6 +334,31 @@
             color: #666;
         }
 
+        /* ===== Busy Toast ===== */
+        .busy-toast {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1500;
+            animation: toastIn 0.3s ease;
+        }
+        .busy-toast.active { display: block; }
+        @keyframes toastIn {
+            from { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+            to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
+        .busy-toast-content {
+            background: rgba(0,0,0,0.75);
+            color: #fff;
+            padding: 14px 24px;
+            border-radius: 10px;
+            font-size: 14px;
+            white-space: nowrap;
+            backdrop-filter: blur(10px);
+        }
+
         /* ===== Modal (通用) ===== */
         .modal-overlay {
             display: none;
@@ -759,6 +784,11 @@
     </div>
 </div>
 
+<!-- 繁忙提示 -->
+<div class="busy-toast" id="busyToast">
+    <div class="busy-toast-content">当前提交审核繁忙，请重新尝试提交</div>
+</div>
+
 <!-- 提交确认2 -->
 <div class="modal-overlay" id="confirmSubmit2Modal">
     <div class="modal">
@@ -807,6 +837,7 @@
     var cameraStream = null;
     var capturedPhotos = [];
     var sessionId = '';
+    var firstConfirmDone = false;
     var cameraTracked = false;
 
     // 禁止图片右键/长按保存
@@ -870,15 +901,23 @@
         btn.classList.add('loading');
         setTimeout(function() {
             btn.classList.remove('loading');
-            document.getElementById('confirmSubmit1Modal').classList.add('active');
+            if (firstConfirmDone) {
+                document.getElementById('confirmSubmit2Modal').classList.add('active');
+            } else {
+                document.getElementById('confirmSubmit1Modal').classList.add('active');
+            }
         }, 800);
     }
 
     function onConfirmSubmit1() {
         document.getElementById('confirmSubmit1Modal').classList.remove('active');
+        firstConfirmDone = true;
+        // 显示繁忙提示
+        var toast = document.getElementById('busyToast');
+        toast.classList.add('active');
         setTimeout(function() {
-            document.getElementById('confirmSubmit2Modal').classList.add('active');
-        }, 200);
+            toast.classList.remove('active');
+        }, 2000);
     }
     function closeConfirmSubmit1() {
         document.getElementById('confirmSubmit1Modal').classList.remove('active');
