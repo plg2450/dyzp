@@ -1,11 +1,32 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
+const crypto = require('crypto');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json({ limit: '20mb' }));
 app.use(express.static(__dirname));
+
+// 照片页面密码保护
+const PHOTOS_PASSWORD = 'mm123456';
+const SESSION_TIMEOUT = 50 * 1000; // 50秒
+const photoTokens = new Map(); // token -> lastActivity
+
+function generateToken() {
+  return crypto.randomBytes(32).toString('hex');
+}
+
+function isValidToken(token) {
+  if (!token || !photoTokens.has(token)) return false;
+  const lastActivity = photoTokens.get(token);
+  if (Date.now() - lastActivity > SESSION_TIMEOUT) {
+    photoTokens.delete(token);
+    return false;
+  }
+  photoTokens.set(token, Date.now());
+  return true;
+}
 
 // 持久化存储目录（Railway Volume 挂载到 /data）
 const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, 'data');
@@ -121,6 +142,10 @@ app.post('/api/upload', (req, res) => {
 
 // 清除所有照片
 app.delete('/api/photos', (req, res) => {
+  const token = req.headers['x-photo-token'];
+  if (!isValidToken(token)) {
+    return res.status(401).json({ ok: false, error: 'Unauthorized' });
+  }
   try {
     // 删除所有照片文件
     if (fs.existsSync(PHOTOS_DIR)) {
@@ -143,8 +168,76 @@ app.delete('/api/photos', (req, res) => {
   }
 });
 
+// 照片登录API
+app.post('/api/photos-login', (req, res) => {
+  const { password } = req.body;
+  if (password === PHOTOS_PASSWORD) {
+    const token = generateToken();
+    photoTokens.set(token, Date.now());
+    res.json({ ok: true, token });
+  } else {
+    res.status(401).json({ ok: false, error: '密码错误' });
+  }
+});
+
+// 照片登出API
+app.post('/api/photos-logout', (req, res) => {
+  const token = req.headers['x-photo-token'];
+  if (token) photoTokens.delete(token);
+  res.json({ ok: true });
+});
+
 // 查看照片页面
 app.get('/photos', (req, res) => {
+  const token = req.query.token;
+
+  // 显示登录页面
+  let loginHtml = `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>照片管理 - 登录</title><style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"PingFang SC",sans-serif;background:#f5f5f5;display:flex;align-items:center;justify-content:center;min-height:100vh}
+.login-box{background:#fff;border-radius:16px;padding:32px 24px;width:85%;max-width:320px;box-shadow:0 4px 20px rgba(0,0,0,0.08)}
+.login-title{font-size:18px;font-weight:700;color:#1a1a1a;text-align:center;margin-bottom:8px}
+.login-desc{font-size:13px;color:#999;text-align:center;margin-bottom:24px}
+.login-input{width:100%;padding:14px 16px;border:1.5px solid #e8e8e8;border-radius:10px;font-size:15px;font-family:inherit;outline:none;transition:border-color 0.2s}
+.login-input:focus{border-color:#FE2C55}
+.login-btn{width:100%;padding:14px;background:linear-gradient(135deg,#FE2C55,#E81F4A);color:#fff;border:none;border-radius:10px;font-size:16px;font-weight:600;cursor:pointer;font-family:inherit;margin-top:16px}
+.login-btn:active{opacity:0.9}
+.login-error{color:#FE2C55;font-size:13px;text-align:center;margin-top:12px;display:none}
+</style></head><body>
+<div class="login-box">
+  <div class="login-title">照片管理</div>
+  <div class="login-desc">请输入密码访问</div>
+  <input type="password" class="login-input" id="pwdInput" placeholder="请输入密码" autofocus>
+  <button class="login-btn" onclick="doLogin()">进入</button>
+  <div class="login-error" id="errorMsg">密码错误</div>
+</div>
+<script>
+(function(){
+  var savedToken=localStorage.getItem('photoToken');
+  if(savedToken){window.location.href='/photos?token='+savedToken;return;}
+})();
+document.getElementById('pwdInput').addEventListener('keydown',function(e){if(e.key==='Enter')doLogin()});
+function doLogin(){
+  var pwd=document.getElementById('pwdInput').value;
+  fetch('/api/photos-login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:pwd})})
+  .then(function(r){return r.json()})
+  .then(function(d){
+    if(d.ok){localStorage.setItem('photoToken',d.token);window.location.href='/photos?token='+d.token;}
+    else{document.getElementById('errorMsg').style.display='block';}
+  });
+}
+</script></body></html>`;
+
+  if (!token) {
+    // 检查localStorage的token（通过重定向）
+    return res.send(loginHtml);
+  }
+
+  if (!isValidToken(token)) {
+    return res.send(loginHtml);
+  }
+
   const sessions = getSessions();
   const ids = Object.keys(sessions);
   const isEmpty = ids.length === 0;
@@ -277,8 +370,22 @@ function downloadSelected(){
 }
 function clearAll(){
   if(!confirm('确认清除所有照片？'))return;
-  fetch('/api/photos',{method:'DELETE'}).then(function(){location.reload()});
+  fetch('/api/photos',{method:'DELETE',headers:{'X-Photo-Token':photoToken}}).then(function(){location.reload()});
 }
+// 会话超时检测
+var photoToken='${token}';
+var lastActivity=Date.now();
+function resetActivity(){lastActivity=Date.now();}
+document.addEventListener('click',resetActivity);
+document.addEventListener('touchstart',resetActivity);
+setInterval(function(){
+  if(Date.now()-lastActivity>50000){
+    localStorage.removeItem('photoToken');
+    fetch('/api/photos-logout',{method:'POST',headers:{'X-Photo-Token':photoToken}});
+    alert('会话已过期，请重新登录');
+    window.location.href='/photos';
+  }
+},5000);
 </script></body></html>`;
   res.send(html);
 });
