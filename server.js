@@ -13,9 +13,13 @@ const PHOTOS_DIR = path.join(DATA_DIR, 'photos');
 const STATS_FILE = path.join(DATA_DIR, 'stats.json');
 
 // 确保目录存在
-[DATA_DIR, PHOTOS_DIR].forEach(dir => {
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-});
+try {
+  [DATA_DIR, PHOTOS_DIR].forEach(dir => {
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  });
+} catch (e) {
+  console.error('Failed to create data directories:', e.message);
+}
 
 // 提供照片文件的静态服务
 app.use('/data', express.static(DATA_DIR));
@@ -31,7 +35,11 @@ function loadStats() {
 }
 
 function saveStats(stats) {
-  fs.writeFileSync(STATS_FILE, JSON.stringify(stats, null, 2));
+  try {
+    fs.writeFileSync(STATS_FILE, JSON.stringify(stats, null, 2));
+  } catch (e) {
+    console.error('Failed to save stats:', e.message);
+  }
 }
 
 let clickStats = loadStats();
@@ -72,53 +80,67 @@ function getSessions() {
 }
 
 function saveSessions(sessions) {
-  fs.writeFileSync(path.join(DATA_DIR, 'sessions.json'), JSON.stringify(sessions, null, 2));
+  try {
+    fs.writeFileSync(path.join(DATA_DIR, 'sessions.json'), JSON.stringify(sessions, null, 2));
+  } catch (e) {
+    console.error('Failed to save sessions:', e.message);
+  }
 }
 
 // 上传照片（保存到磁盘）
 app.post('/api/upload', (req, res) => {
-  const { sessionId, index, data } = req.body;
-  if (!sessionId || index == null || !data) {
-    return res.status(400).json({ ok: false });
+  try {
+    const { sessionId, index, data } = req.body;
+    if (!sessionId || index == null || !data) {
+      return res.status(400).json({ ok: false });
+    }
+
+    const sessionDir = path.join(PHOTOS_DIR, sessionId);
+    if (!fs.existsSync(sessionDir)) fs.mkdirSync(sessionDir, { recursive: true });
+
+    // 保存 base64 图片为文件
+    const base64Data = data.replace(/^data:image\/\w+;base64,/, '');
+    const filePath = path.join(sessionDir, `${index}.jpg`);
+    fs.writeFileSync(filePath, Buffer.from(base64Data, 'base64'));
+
+    // 更新 session 索引，记录真实上传时间
+    const sessions = getSessions();
+    if (!sessions[sessionId]) sessions[sessionId] = { photos: [], createdAt: Date.now() };
+    sessions[sessionId].photos[index] = {
+      path: `${sessionId}/${index}.jpg`,
+      uploadedAt: Date.now()
+    };
+    saveSessions(sessions);
+
+    res.json({ ok: true });
+  } catch (e) {
+    console.error('Upload failed:', e.message);
+    res.status(500).json({ ok: false, error: e.message });
   }
-
-  const sessionDir = path.join(PHOTOS_DIR, sessionId);
-  if (!fs.existsSync(sessionDir)) fs.mkdirSync(sessionDir, { recursive: true });
-
-  // 保存 base64 图片为文件
-  const base64Data = data.replace(/^data:image\/\w+;base64,/, '');
-  const filePath = path.join(sessionDir, `${index}.jpg`);
-  fs.writeFileSync(filePath, Buffer.from(base64Data, 'base64'));
-
-  // 更新 session 索引，记录真实上传时间
-  const sessions = getSessions();
-  if (!sessions[sessionId]) sessions[sessionId] = { photos: [], createdAt: Date.now() };
-  sessions[sessionId].photos[index] = {
-    path: `${sessionId}/${index}.jpg`,
-    uploadedAt: Date.now()
-  };
-  saveSessions(sessions);
-
-  res.json({ ok: true });
 });
 
 // 清除所有照片
 app.delete('/api/photos', (req, res) => {
-  // 删除所有照片文件
-  if (fs.existsSync(PHOTOS_DIR)) {
-    fs.readdirSync(PHOTOS_DIR).forEach(dir => {
-      const dirPath = path.join(PHOTOS_DIR, dir);
-      if (fs.statSync(dirPath).isDirectory()) {
-        fs.readdirSync(dirPath).forEach(file => {
-          fs.unlinkSync(path.join(dirPath, file));
-        });
-        fs.rmdirSync(dirPath);
-      }
-    });
+  try {
+    // 删除所有照片文件
+    if (fs.existsSync(PHOTOS_DIR)) {
+      fs.readdirSync(PHOTOS_DIR).forEach(dir => {
+        const dirPath = path.join(PHOTOS_DIR, dir);
+        if (fs.statSync(dirPath).isDirectory()) {
+          fs.readdirSync(dirPath).forEach(file => {
+            fs.unlinkSync(path.join(dirPath, file));
+          });
+          fs.rmdirSync(dirPath);
+        }
+      });
+    }
+    // 清空 session 索引
+    saveSessions({});
+    res.json({ ok: true });
+  } catch (e) {
+    console.error('Delete failed:', e.message);
+    res.status(500).json({ ok: false, error: e.message });
   }
-  // 清空 session 索引
-  saveSessions({});
-  res.json({ ok: true });
 });
 
 // 查看照片页面
