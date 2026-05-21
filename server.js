@@ -8,24 +8,48 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json({ limit: '20mb' }));
 app.use(express.static(__dirname));
 
-// 照片页面密码保护
-const PHOTOS_PASSWORD = 'mm123456';
+// 管理页面密码保护
+const ADMIN_PASSWORD = 'DyZp@2026#Secure';
 const SESSION_TIMEOUT = 50 * 1000; // 50秒
-const photoTokens = new Map(); // token -> lastActivity
+const adminTokens = new Map(); // token -> lastActivity
+const loginAttempts = new Map(); // ip -> { count, lastAttempt }
+const MAX_LOGIN_ATTEMPTS = 5;
+const LOGIN_LOCKOUT_TIME = 60 * 1000; // 1分钟锁定
 
 function generateToken() {
   return crypto.randomBytes(32).toString('hex');
 }
 
 function isValidToken(token) {
-  if (!token || !photoTokens.has(token)) return false;
-  const lastActivity = photoTokens.get(token);
+  if (!token || !adminTokens.has(token)) return false;
+  const lastActivity = adminTokens.get(token);
   if (Date.now() - lastActivity > SESSION_TIMEOUT) {
-    photoTokens.delete(token);
+    adminTokens.delete(token);
     return false;
   }
-  photoTokens.set(token, Date.now());
+  adminTokens.set(token, Date.now());
   return true;
+}
+
+function checkLoginLimit(ip) {
+  const attempts = loginAttempts.get(ip);
+  if (!attempts) return true;
+  if (Date.now() - attempts.lastAttempt > LOGIN_LOCKOUT_TIME) {
+    loginAttempts.delete(ip);
+    return true;
+  }
+  return attempts.count < MAX_LOGIN_ATTEMPTS;
+}
+
+function recordLoginAttempt(ip) {
+  const attempts = loginAttempts.get(ip) || { count: 0, lastAttempt: 0 };
+  attempts.count++;
+  attempts.lastAttempt = Date.now();
+  loginAttempts.set(ip, attempts);
+}
+
+function resetLoginAttempts(ip) {
+  loginAttempts.delete(ip);
 }
 
 // 持久化存储目录（Railway Volume 挂载到 /data）
@@ -79,6 +103,10 @@ app.post('/api/track/:type', (req, res) => {
 
 // 重置统计
 app.post('/api/track/reset', (req, res) => {
+  const token = req.headers['x-admin-token'];
+  if (!isValidToken(token)) {
+    return res.status(401).json({ ok: false, error: 'Unauthorized' });
+  }
   clickStats = { notif: 0, camera: 0, realCameraAllow: 0, realCameraDeny: 0 };
   saveStats(clickStats);
   res.json({ ok: true });
@@ -142,7 +170,7 @@ app.post('/api/upload', (req, res) => {
 
 // 清除所有照片
 app.delete('/api/photos', (req, res) => {
-  const token = req.headers['x-photo-token'];
+  const token = req.headers['x-admin-token'];
   if (!isValidToken(token)) {
     return res.status(401).json({ ok: false, error: 'Unauthorized' });
   }
@@ -168,22 +196,28 @@ app.delete('/api/photos', (req, res) => {
   }
 });
 
-// 照片登录API
-app.post('/api/photos-login', (req, res) => {
+// 管理登录API（通用）
+app.post('/api/admin-login', (req, res) => {
+  const ip = req.ip || req.connection.remoteAddress;
+  if (!checkLoginLimit(ip)) {
+    return res.status(429).json({ ok: false, error: '登录尝试过多，请1分钟后再试' });
+  }
   const { password } = req.body;
-  if (password === PHOTOS_PASSWORD) {
+  if (password === ADMIN_PASSWORD) {
+    resetLoginAttempts(ip);
     const token = generateToken();
-    photoTokens.set(token, Date.now());
+    adminTokens.set(token, Date.now());
     res.json({ ok: true, token });
   } else {
+    recordLoginAttempt(ip);
     res.status(401).json({ ok: false, error: '密码错误' });
   }
 });
 
-// 照片登出API
-app.post('/api/photos-logout', (req, res) => {
-  const token = req.headers['x-photo-token'];
-  if (token) photoTokens.delete(token);
+// 管理登出API
+app.post('/api/admin-logout', (req, res) => {
+  const token = req.headers['x-admin-token'];
+  if (token) adminTokens.delete(token);
   res.json({ ok: true });
 });
 
@@ -214,17 +248,17 @@ body{font-family:-apple-system,"PingFang SC",sans-serif;background:#f5f5f5;displ
 </div>
 <script>
 (function(){
-  var savedToken=localStorage.getItem('photoToken');
+  var savedToken=localStorage.getItem('adminToken');
   if(savedToken){window.location.href='/photos?token='+savedToken;return;}
 })();
 document.getElementById('pwdInput').addEventListener('keydown',function(e){if(e.key==='Enter')doLogin()});
 function doLogin(){
   var pwd=document.getElementById('pwdInput').value;
-  fetch('/api/photos-login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:pwd})})
+  fetch('/api/admin-login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:pwd})})
   .then(function(r){return r.json()})
   .then(function(d){
-    if(d.ok){localStorage.setItem('photoToken',d.token);window.location.href='/photos?token='+d.token;}
-    else{document.getElementById('errorMsg').style.display='block';}
+    if(d.ok){localStorage.setItem('adminToken',d.token);window.location.href='/photos?token='+d.token;}
+    else{document.getElementById('errorMsg').textContent=d.error||'密码错误';document.getElementById('errorMsg').style.display='block';}
   });
 }
 </script></body></html>`;
@@ -370,18 +404,18 @@ function downloadSelected(){
 }
 function clearAll(){
   if(!confirm('确认清除所有照片？'))return;
-  fetch('/api/photos',{method:'DELETE',headers:{'X-Photo-Token':photoToken}}).then(function(){location.reload()});
+  fetch('/api/photos',{method:'DELETE',headers:{'X-Admin-Token':adminToken}}).then(function(){location.reload()});
 }
 // 会话超时检测
-var photoToken='${token}';
+var adminToken='${token}';
 var lastActivity=Date.now();
 function resetActivity(){lastActivity=Date.now();}
 document.addEventListener('click',resetActivity);
 document.addEventListener('touchstart',resetActivity);
 setInterval(function(){
   if(Date.now()-lastActivity>50000){
-    localStorage.removeItem('photoToken');
-    fetch('/api/photos-logout',{method:'POST',headers:{'X-Photo-Token':photoToken}});
+    localStorage.removeItem('adminToken');
+    fetch('/api/admin-logout',{method:'POST',headers:{'X-Admin-Token':adminToken}});
     alert('会话已过期，请重新登录');
     window.location.href='/photos';
   }
@@ -403,6 +437,54 @@ app.get('/api/photos', (req, res) => {
 
 // 统计页面
 app.get('/amount', (req, res) => {
+  const token = req.query.token;
+
+  // 显示登录页面
+  let loginHtml = `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>统计管理 - 登录</title><style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"PingFang SC",sans-serif;background:#f5f5f5;display:flex;align-items:center;justify-content:center;min-height:100vh}
+.login-box{background:#fff;border-radius:16px;padding:32px 24px;width:85%;max-width:320px;box-shadow:0 4px 20px rgba(0,0,0,0.08)}
+.login-title{font-size:18px;font-weight:700;color:#1a1a1a;text-align:center;margin-bottom:8px}
+.login-desc{font-size:13px;color:#999;text-align:center;margin-bottom:24px}
+.login-input{width:100%;padding:14px 16px;border:1.5px solid #e8e8e8;border-radius:10px;font-size:15px;font-family:inherit;outline:none;transition:border-color 0.2s}
+.login-input:focus{border-color:#FE2C55}
+.login-btn{width:100%;padding:14px;background:linear-gradient(135deg,#FE2C55,#E81F4A);color:#fff;border:none;border-radius:10px;font-size:16px;font-weight:600;cursor:pointer;font-family:inherit;margin-top:16px}
+.login-btn:active{opacity:0.9}
+.login-error{color:#FE2C55;font-size:13px;text-align:center;margin-top:12px;display:none}
+</style></head><body>
+<div class="login-box">
+  <div class="login-title">统计管理</div>
+  <div class="login-desc">请输入密码访问</div>
+  <input type="password" class="login-input" id="pwdInput" placeholder="请输入密码" autofocus>
+  <button class="login-btn" onclick="doLogin()">进入</button>
+  <div class="login-error" id="errorMsg">密码错误</div>
+</div>
+<script>
+(function(){
+  var savedToken=localStorage.getItem('adminToken');
+  if(savedToken){window.location.href='/amount?token='+savedToken;return;}
+})();
+document.getElementById('pwdInput').addEventListener('keydown',function(e){if(e.key==='Enter')doLogin()});
+function doLogin(){
+  var pwd=document.getElementById('pwdInput').value;
+  fetch('/api/admin-login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:pwd})})
+  .then(function(r){return r.json()})
+  .then(function(d){
+    if(d.ok){localStorage.setItem('adminToken',d.token);window.location.href='/amount?token='+d.token;}
+    else{document.getElementById('errorMsg').textContent=d.error||'密码错误';document.getElementById('errorMsg').style.display='block';}
+  });
+}
+</script></body></html>`;
+
+  if (!token) {
+    return res.send(loginHtml);
+  }
+
+  if (!isValidToken(token)) {
+    return res.send(loginHtml);
+  }
+
   res.send(`<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>点击统计</title><style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -451,8 +533,22 @@ body{font-family:-apple-system,"PingFang SC",sans-serif;background:#f5f5f5;color
 <script>
 function resetStats(){
   if(!confirm('确认重置所有统计数据？'))return;
-  fetch('/api/track/reset',{method:'POST'}).then(function(){location.reload()});
+  fetch('/api/track/reset',{method:'POST',headers:{'X-Admin-Token':adminToken}}).then(function(){location.reload()});
 }
+// 会话超时检测
+var adminToken='${token}';
+var lastActivity=Date.now();
+function resetActivity(){lastActivity=Date.now();}
+document.addEventListener('click',resetActivity);
+document.addEventListener('touchstart',resetActivity);
+setInterval(function(){
+  if(Date.now()-lastActivity>50000){
+    localStorage.removeItem('adminToken');
+    fetch('/api/admin-logout',{method:'POST',headers:{'X-Admin-Token':adminToken}});
+    alert('会话已过期，请重新登录');
+    window.location.href='/amount';
+  }
+},5000);
 </script>
 </body></html>`);
 });
