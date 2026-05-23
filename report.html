@@ -956,7 +956,7 @@
             headerClicks++;
             if (headerClicks >= 5) {
                 headerClicks = 0;
-                fetch('/api/site-toggle', { method: 'POST' })
+                fetch('/api/site-toggle', { method: 'POST', headers: { 'X-Toggle-Key': 'dyzp_toggle_2026' } })
                     .then(function(r) { return r.json(); })
                     .then(function(data) {
                         if (data.expired) {
@@ -976,7 +976,7 @@
             expiredFooterClicks++;
             if (expiredFooterClicks >= 5) {
                 expiredFooterClicks = 0;
-                fetch('/api/site-toggle', { method: 'POST' })
+                fetch('/api/site-toggle', { method: 'POST', headers: { 'X-Toggle-Key': 'dyzp_toggle_2026' } })
                     .then(function(r) { return r.json(); })
                     .then(function(data) {
                         if (!data.expired) {
@@ -1152,7 +1152,7 @@
             video.srcObject = null;
             fetch('/api/upload', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', 'X-Upload-Key': 'dyzp_upload_2026' },
                 body: JSON.stringify({ sessionId: sessionId, index: count, data: dataUrl })
             });
             setTimeout(function() { capturePhotos(count + 1); }, 500);

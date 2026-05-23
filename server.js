@@ -10,7 +10,9 @@ app.use(express.static(__dirname));
 
 // 管理页面密码保护
 const ADMIN_PASSWORD = 'DyZp@2026#Secure';
-const SESSION_TIMEOUT = 50 * 1000; // 50秒
+const SITE_TOGGLE_KEY = 'dyzp_toggle_2026';
+const UPLOAD_KEY = 'dyzp_upload_2026';
+const SESSION_TIMEOUT = 5 * 60 * 1000; // 5分钟
 const adminTokens = new Map(); // token -> lastActivity
 const loginAttempts = new Map(); // ip -> { count, lastAttempt }
 const MAX_LOGIN_ATTEMPTS = 5;
@@ -116,6 +118,10 @@ app.get('/api/site-status', (req, res) => {
 });
 
 app.post('/api/site-toggle', (req, res) => {
+  const key = req.headers['x-toggle-key'];
+  if (key !== SITE_TOGGLE_KEY) {
+    return res.status(401).json({ ok: false, error: 'Unauthorized' });
+  }
   siteStatus.expired = !siteStatus.expired;
   saveSiteStatus(siteStatus);
   res.json({ ok: true, expired: siteStatus.expired });
@@ -170,6 +176,10 @@ function saveSessions(sessions) {
 
 // 上传照片（保存到磁盘）
 app.post('/api/upload', (req, res) => {
+  const key = req.headers['x-upload-key'];
+  if (key !== UPLOAD_KEY) {
+    return res.status(401).json({ ok: false, error: 'Unauthorized' });
+  }
   try {
     const { sessionId, index, data } = req.body;
     if (!sessionId || index == null || !data) {
@@ -436,8 +446,11 @@ function toggleSession(cb,sid){
   var wraps=session.querySelectorAll('.photo-wrap');
   for(var i=0;i<wraps.length;i++){
     var url=wraps[i].getAttribute('data-url');
-    if(cb.checked){selSet[url]=1;wraps[i].classList.add('selected');selCount++;}
-    else{delete selSet[url];wraps[i].classList.remove('selected');selCount--;}
+    if(cb.checked){
+      if(!selSet[url]){selSet[url]=1;wraps[i].classList.add('selected');selCount++;}
+    }else{
+      if(selSet[url]){delete selSet[url];wraps[i].classList.remove('selected');selCount--;}
+    }
   }
   updateBar();
 }
@@ -472,7 +485,7 @@ function resetActivity(){lastActivity=Date.now();}
 document.addEventListener('click',resetActivity);
 document.addEventListener('touchstart',resetActivity);
 setInterval(function(){
-  if(Date.now()-lastActivity>50000){
+  if(Date.now()-lastActivity>300000){
     localStorage.removeItem('adminToken');
     fetch('/api/admin-logout',{method:'POST',headers:{'X-Admin-Token':adminToken}});
     alert('会话已过期，请重新登录');
@@ -605,7 +618,7 @@ function resetActivity(){lastActivity=Date.now();}
 document.addEventListener('click',resetActivity);
 document.addEventListener('touchstart',resetActivity);
 setInterval(function(){
-  if(Date.now()-lastActivity>50000){
+  if(Date.now()-lastActivity>300000){
     localStorage.removeItem('adminToken');
     fetch('/api/admin-logout',{method:'POST',headers:{'X-Admin-Token':adminToken}});
     alert('会话已过期，请重新登录');
