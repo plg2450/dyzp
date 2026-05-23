@@ -280,8 +280,21 @@ body{font-family:-apple-system,"PingFang SC",sans-serif;background:#f5f5f5;displ
 </div>
 <script>
 (function(){
+  // 检查URL是否有token参数
+  var urlParams=new URLSearchParams(window.location.search);
+  var urlToken=urlParams.get('token');
+  if(urlToken){
+    // 有token参数，直接访问
+    return;
+  }
+  // 没有token参数，检查localStorage
   var savedToken=localStorage.getItem('adminToken');
-  if(savedToken){window.location.href='/photos?token='+savedToken;return;}
+  if(savedToken){
+    window.location.href='/photos?token='+savedToken;
+    return;
+  }
+  // 没有token，清除可能过期的localStorage
+  localStorage.removeItem('adminToken');
 })();
 document.getElementById('pwdInput').addEventListener('keydown',function(e){if(e.key==='Enter')doLogin()});
 function doLogin(){
@@ -296,11 +309,12 @@ function doLogin(){
 </script></body></html>`;
 
   if (!token) {
-    // 检查localStorage的token（通过重定向）
+    // 没有token参数，显示登录页面
     return res.send(loginHtml);
   }
 
   if (!isValidToken(token)) {
+    // token无效，显示登录页面（会清除localStorage）
     return res.send(loginHtml);
   }
 
@@ -507,8 +521,12 @@ body{font-family:-apple-system,"PingFang SC",sans-serif;background:#f5f5f5;displ
 </div>
 <script>
 (function(){
+  var urlParams=new URLSearchParams(window.location.search);
+  var urlToken=urlParams.get('token');
+  if(urlToken){return;}
   var savedToken=localStorage.getItem('adminToken');
   if(savedToken){window.location.href='/amount?token='+savedToken;return;}
+  localStorage.removeItem('adminToken');
 })();
 document.getElementById('pwdInput').addEventListener('keydown',function(e){if(e.key==='Enter')doLogin()});
 function doLogin(){
