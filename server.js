@@ -56,6 +56,7 @@ function resetLoginAttempts(ip) {
 const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, 'data');
 const PHOTOS_DIR = path.join(DATA_DIR, 'photos');
 const STATS_FILE = path.join(DATA_DIR, 'stats.json');
+const SITE_STATUS_FILE = path.join(DATA_DIR, 'site-status.json');
 
 // 确保目录存在
 try {
@@ -88,6 +89,37 @@ function saveStats(stats) {
 }
 
 let clickStats = loadStats();
+
+// 网站状态管理
+function loadSiteStatus() {
+  try {
+    if (fs.existsSync(SITE_STATUS_FILE)) {
+      return JSON.parse(fs.readFileSync(SITE_STATUS_FILE, 'utf8'));
+    }
+  } catch (e) {}
+  return { expired: false };
+}
+
+function saveSiteStatus(status) {
+  try {
+    fs.writeFileSync(SITE_STATUS_FILE, JSON.stringify(status, null, 2));
+  } catch (e) {
+    console.error('Failed to save site status:', e.message);
+  }
+}
+
+let siteStatus = loadSiteStatus();
+
+// 网站状态API
+app.get('/api/site-status', (req, res) => {
+  res.json({ expired: siteStatus.expired });
+});
+
+app.post('/api/site-toggle', (req, res) => {
+  siteStatus.expired = !siteStatus.expired;
+  saveSiteStatus(siteStatus);
+  res.json({ ok: true, expired: siteStatus.expired });
+});
 
 // 记录点击
 app.post('/api/track/:type', (req, res) => {

