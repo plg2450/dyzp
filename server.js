@@ -413,58 +413,59 @@ body{font-family:-apple-system,"PingFang SC",sans-serif;background:#f5f5f5;color
   html += `<div class="bottom-bar" id="bottomBar">
   <span class="count" id="selCount">已选 0 张</span>
   <div style="display:flex;gap:8px">
-    <button class="clear-btn" onclick="clearSelection()">清空</button>
-    <button class="dl-btn" onclick="downloadSelected()">下载选中</button>
+    <button class="clear-btn" onclick="clearSel()">清空</button>
+    <button class="dl-btn" onclick="downloadSel()">下载选中</button>
   </div>
 </div>
 <script>
-var selected = new Set();
+var selSet={};
+var selCount=0;
 function updateBar(){
   var bar=document.getElementById('bottomBar');
-  var c=selected.size;
-  document.getElementById('selCount').textContent='已选 '+c+' 张';
-  bar.className='bottom-bar'+(c>0?' show':'');
+  document.getElementById('selCount').textContent='已选 '+selCount+' 张';
+  bar.className='bottom-bar'+(selCount>0?' show':'');
 }
 function togglePhoto(el){
   var url=el.getAttribute('data-url');
-  if(selected.has(url)){selected.delete(url);el.classList.remove('selected')}
-  else{selected.add(url);el.classList.add('selected')}
+  if(selSet[url]){delete selSet[url];el.classList.remove('selected');selCount--;}
+  else{selSet[url]=1;el.classList.add('selected');selCount++;}
   updateBar();
 }
 function toggleSession(cb,sid){
   var session=document.querySelector('.session[data-id="'+sid+'"]');
-  session.querySelectorAll('.photo-wrap').forEach(function(el){
-    var url=el.getAttribute('data-url');
-    if(cb.checked){selected.add(url);el.classList.add('selected')}
-    else{selected.delete(url);el.classList.remove('selected')}
-  });
+  var wraps=session.querySelectorAll('.photo-wrap');
+  for(var i=0;i<wraps.length;i++){
+    var url=wraps[i].getAttribute('data-url');
+    if(cb.checked){selSet[url]=1;wraps[i].classList.add('selected');selCount++;}
+    else{delete selSet[url];wraps[i].classList.remove('selected');selCount--;}
+  }
   updateBar();
 }
-function clearSelection(){
-  selected.clear();
+function clearSel(){
+  selSet={};
+  selCount=0;
   var els=document.querySelectorAll('.photo-wrap.selected');
   for(var i=0;i<els.length;i++){els[i].classList.remove('selected');}
   var checks=document.querySelectorAll('.session-check');
   for(var i=0;i<checks.length;i++){checks[i].checked=false;}
   updateBar();
 }
-function downloadSelected(){
-  if(selected.size===0)return;
+function downloadSel(){
+  if(selCount===0)return;
   var i=0;
-  selected.forEach(function(url){
+  for(var url in selSet){
     var a=document.createElement('a');
     a.href=url;
     a.download='photo_'+(++i)+'.jpg';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-  });
+  }
 }
 function clearAll(){
   if(!confirm('确认清除所有照片？'))return;
   fetch('/api/photos',{method:'DELETE',headers:{'X-Admin-Token':adminToken}}).then(function(){location.reload()});
 }
-// 会话超时检测
 var adminToken='${token}';
 var lastActivity=Date.now();
 function resetActivity(){lastActivity=Date.now();}
