@@ -442,12 +442,10 @@ function toggleSession(cb,sid){
 }
 function clearSelection(){
   selected.clear();
-  document.querySelectorAll('.photo-wrap.selected').forEach(function(el){
-    el.classList.remove('selected');
-  });
-  document.querySelectorAll('.session-check').forEach(function(el){
-    el.checked=false;
-  });
+  var els=document.querySelectorAll('.photo-wrap.selected');
+  for(var i=0;i<els.length;i++){els[i].classList.remove('selected');}
+  var checks=document.querySelectorAll('.session-check');
+  for(var i=0;i<checks.length;i++){checks[i].checked=false;}
   updateBar();
 }
 function downloadSelected(){
