@@ -357,6 +357,7 @@ body{font-family:-apple-system,"PingFang SC",sans-serif;background:#f5f5f5;color
 .bottom-bar.show{display:flex}
 .bottom-bar .count{font-size:15px;color:#333;font-weight:500}
 .bottom-bar .dl-btn{background:linear-gradient(135deg,#FE2C55,#E81F4A);color:#fff;border:none;padding:12px 28px;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(254,44,85,0.3)}
+.clear-btn{background:#fff;color:#666;border:1.5px solid #ddd;padding:12px 20px;border-radius:12px;font-size:15px;cursor:pointer;font-family:inherit}
 </style></head><body>
 <div class="topbar">
   <h1>已采集照片</h1>
@@ -412,7 +413,7 @@ body{font-family:-apple-system,"PingFang SC",sans-serif;background:#f5f5f5;color
   html += `<div class="bottom-bar" id="bottomBar">
   <span class="count" id="selCount">已选 0 张</span>
   <div style="display:flex;gap:8px">
-    <button class="dl-btn" style="background:#fff;color:#666;border:1.5px solid #ddd;box-shadow:none" onclick="clearSelection()">清空</button>
+    <button class="clear-btn" onclick="clearSelection()">清空</button>
     <button class="dl-btn" onclick="downloadSelected()">下载选中</button>
   </div>
 </div>
