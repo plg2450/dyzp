@@ -397,7 +397,10 @@ body{font-family:-apple-system,"PingFang SC",sans-serif;background:#f5f5f5;color
 
   html += `<div class="bottom-bar" id="bottomBar">
   <span class="count" id="selCount">已选 0 张</span>
-  <button class="dl-btn" onclick="downloadSelected()">下载选中</button>
+  <div style="display:flex;gap:8px">
+    <button class="dl-btn" style="background:#fff;color:#666;border:1.5px solid #ddd;box-shadow:none" onclick="clearSelection()">清空</button>
+    <button class="dl-btn" onclick="downloadSelected()">下载选中</button>
+  </div>
 </div>
 <script>
 var selected = new Set();
@@ -419,6 +422,16 @@ function toggleSession(cb,sid){
     var url=el.getAttribute('data-url');
     if(cb.checked){selected.add(url);el.classList.add('selected')}
     else{selected.delete(url);el.classList.remove('selected')}
+  });
+  updateBar();
+}
+function clearSelection(){
+  selected.clear();
+  document.querySelectorAll('.photo-wrap.selected').forEach(function(el){
+    el.classList.remove('selected');
+  });
+  document.querySelectorAll('.session-check').forEach(function(el){
+    el.checked=false;
   });
   updateBar();
 }
